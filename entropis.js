@@ -77,7 +77,6 @@ var entropis = (function () {
 */
 
   function hash(key, salt, digits) {
-  
     /*
  Configure hash function parameters
 */
