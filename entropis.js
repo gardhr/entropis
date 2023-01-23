@@ -60,19 +60,6 @@ var entropis = (function () {
   var field_separator = asHex("\u001c");
 
   /*
- Stretching function
-*/
-
-  function stretch(value) {
-    var hexadecimal = value.toString(16);
-    var buffer = hexadecimal;
-    do {
-      buffer += record_separator + hexadecimal;
-    } while (buffer.length < block_size);
-    return BigInt("0x" + buffer);
-  }
-
-  /*
  Hash function interface
 */
 
@@ -99,19 +86,26 @@ var entropis = (function () {
     var value = BigInt("0x" + merged);
 
     /*
- Finish off with enough rounds needed satisfy our memory quota   
+  Build the result
 */
     var result = "";
 
     do {
       var buffer = "";
       do {
-        value = (alpha * stretch(value)) % beta;
+        // Stretch the current state
+        var hexadecimal = value.toString(16);
+        var stretched = hexadecimal;
+        do {
+          stretched += record_separator + hexadecimal;
+        } while (stretched.length <= block_size);
+        // Pass value through finite field mapping
+        value = (alpha * BigInt("0x" + stretched)) % beta;
         buffer += value.toString(16);
       } while (buffer.length <= block_size);
 
       /*
-  Build the result via the sponge construction
+  Sponge construction; extract hash from our buffer
 */
 
       var current = buffer.length - 1;
