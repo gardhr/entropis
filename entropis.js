@@ -7,10 +7,6 @@ var entropis = (function () {
   for (var idx = 0x30; idx < 0x3a; ++idx) lookupCode[idx] = idx - 0x30;
   for (var idx = 0x61; idx < 0x67; ++idx) lookupCode[idx] = idx - 0x57;
 
-  /*
- Static lookup tables
-*/
-
   var hexChars = "0123456789abcdef";
   var lookupHex = new Array(256);
   for (var idx = 0; idx < 256; ++idx)
