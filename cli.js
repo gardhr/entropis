@@ -1,7 +1,7 @@
 const entropis = require("./entropis");
 let argv = process.argv.slice(1);
 let argc = argv.length;
-if (argc <= 1) console.log("Usage:", argv[0], "[PASS] [SALT] [DIGITS]");
+if (argc <= 1) console.log("Usage:", argv[0], "[KEY] [SALT] [DIGITS]");
 let key;
 if (argc > 1) key = argv[1];
 let salt;
