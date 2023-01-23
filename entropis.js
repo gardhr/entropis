@@ -52,8 +52,6 @@ var entropis = (function () {
 
   var block_size = 1 << 16;
 
-console.log(alpha)
-
   /*
  Separators, for immalleability purposes
 */
@@ -131,7 +129,7 @@ console.log(alpha)
     return result.substr(0, digits);
   }
 
-  return hash;
+  return { hash };
 })();
 
 if (typeof module !== "undefined") module.exports = entropis;
