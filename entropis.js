@@ -31,6 +31,10 @@ var entropis = (function () {
     return result;
   }
 
+  function toHex(value) {
+    return value.toString(16);
+  }
+
   /*
  Certified safe primes (source: primes.utm.edu)
 */
@@ -114,11 +118,107 @@ var entropis = (function () {
         current -= offset;
         result += buffer.charAt(current);
       }
+      if (digits < 0) return result;
     } while (result.length < digits);
     return result.substr(0, digits);
   }
 
-  return { hash };
+  /*
+ Encode text as base-64 string
+*/
+
+  function encode(key, text) {
+    if (!text) text = "";
+    var result = "";
+    var buffer = "";
+    for (var i = 0; i < 16; ++i)
+      buffer += toHex(Math.floor(Math.random() * 0xffffffff));
+    var seed = hash(key, [buffer, new Date().getTime().toString()], 128);
+    result += seed;
+    var blob = "";
+    var size = text.length;
+    var shex = toHex(size);
+    blob += lookupHex[shex.length][1];
+    blob += shex;
+    blob += asHex(text);
+    var needed = blob.length;
+    var pad = "";
+    var next = key;
+    while (pad.length < needed) {
+      next = hash(next, seed, -1);
+      pad += next;
+    }
+    var index;
+    for (index = 0; index < needed; ++index) {
+      var lhs = lookupCode[blob.codePointAt(index)];
+      var rhs = lookupCode[pad.codePointAt(index)];
+      var xored = lhs ^ rhs;
+      result += hexChars[xored];
+    }
+    while (index < pad.length)
+      result += hexChars[lookupCode[pad.codePointAt(index++)]];
+    // TODO: refactor
+    return btoa(
+      result
+        .match(/\w{2}/g)
+        .map(function (a) {
+          return String.fromCharCode(parseInt(a, 16));
+        })
+        .join("")
+    );
+  }
+
+  // TODO: refactor
+  function base64ToHex(str) {
+    const raw = atob(str);
+    let result = "";
+    for (let i = 0; i < raw.length; i++) {
+      const hex = raw.charCodeAt(i).toString(16);
+      result += hex.length === 2 ? hex : "0" + hex;
+    }
+    return result.toLowerCase();
+  }
+
+  /*
+ Decode text from base-64 string
+*/
+
+  function decode(key, base64) {
+    var result = "";
+    var hex = base64ToHex(base64);
+    var seed = hex.substr(0, 128);
+    var encoded = hex.substr(128, base64.length);
+    var needed = encoded.length;
+    var pad = "";
+    var next = key;
+    while (pad.length < needed) {
+      next = hash(next, seed, -1);
+      pad += next;
+    }
+    var index;
+    var slen = 0;
+    var hlen =
+      lookupCode[encoded.codePointAt(0)] ^ lookupCode[pad.codePointAt(0)];
+    for (index = 1; index <= hlen; ++index) {
+      slen <<= 4;
+      slen +=
+        lookupCode[encoded.codePointAt(index)] ^
+        lookupCode[pad.codePointAt(index)];
+    }
+    needed -= index;
+    for (; index < needed; index += 2) {
+      var lhs = lookupCode[encoded.codePointAt(index)];
+      var rhs = lookupCode[pad.codePointAt(index)];
+      var xored = (lhs ^ rhs) << 4;
+      lhs = lookupCode[encoded.codePointAt(index + 1)];
+      rhs = lookupCode[pad.codePointAt(index + 1)];
+      xored |= lhs ^ rhs;
+      result += String.fromCodePoint(xored);
+    }
+    return result;
+  }
+
+  return { hash, encode, decode };
 })();
 
 if (typeof module !== "undefined") module.exports = entropis;
