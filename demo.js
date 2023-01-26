@@ -14,3 +14,4 @@ var enc = entropis.encode(key, text);
 console.log("encode:", enc);
 var dec = entropis.decode(key, enc);
 console.log("decode:", dec);
+
