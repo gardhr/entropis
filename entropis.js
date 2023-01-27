@@ -205,8 +205,7 @@ var entropis = (function () {
         lookupCode[encoded.codePointAt(index)] ^
         lookupCode[pad.codePointAt(index)];
     }
-    needed -= index;
-    for (; index < needed; index += 2) {
+    for (needed -= index; index < needed; index += 2) {
       var lhs = lookupCode[encoded.codePointAt(index)];
       var rhs = lookupCode[pad.codePointAt(index)];
       var xored = (lhs ^ rhs) << 4;
