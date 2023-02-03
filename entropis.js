@@ -265,15 +265,15 @@ var entropis = (function () {
   function set(master, domain, password) {
     var datastore = get(master);
     if (datastore == null) return null;
-    if (password === undefined) return null 
+    if (password === undefined) return null;
     if (password == null) delete datastore[domain];
     else datastore[domain] = password;
     return (entropis.storage = encode(master, datastore));
   }
-  
+
   function remove(master, domain) {
-   return set(master, domain, null)
-  }  
+    return set(master, domain, null);
+  }
 
   function clear() {
     entropis.storage = null;

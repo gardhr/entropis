@@ -15,12 +15,20 @@ var dec = entropis.decode(pass, enc);
 console.log("decode:", dec);
 var domain = "example.com";
 var another = "MyReallyStrongPassword#923333";
-console.log("entropis.set(pass, domain, another):", entropis.set(pass, domain, another));
+console.log(
+  "entropis.set(pass, domain, another):",
+  entropis.set(pass, domain, another)
+);
 console.log("entropis.get('foo', domain):", entropis.get("foo", domain));
 console.log("entropis.get(pass, domain):", entropis.get(pass, domain));
 console.log("entropis.remove(pass, domain):", entropis.remove(pass, domain));
 console.log("entropis.get(pass, domain):", entropis.get(pass, domain));
-console.log("entropis.set(pass, domain, another):", entropis.set(pass, domain, another));
-console.log("entropis.set('foo', domain, another):", entropis.set("foo", domain, another));
+console.log(
+  "entropis.set(pass, domain, another):",
+  entropis.set(pass, domain, another)
+);
+console.log(
+  "entropis.set('foo', domain, another):",
+  entropis.set("foo", domain, another)
+);
 console.log("entropis.get(pass, domain):", entropis.get(pass, domain));
-
