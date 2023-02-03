@@ -123,7 +123,7 @@ var entropis = (function () {
         do {
           stretched += record_separator + hexadecimal;
         } while (stretched.length <= block_size);
-        // Pass value through finite field mapping
+        // Pass value through finite-field mapping
         value = (alpha * BigInt("0x" + stretched)) % beta;
         buffer += value.toString(16);
       } while (buffer.length <= block_size);
