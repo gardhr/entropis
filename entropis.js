@@ -87,18 +87,18 @@ var entropis = (function () {
  Hash function interface
 */
 
-  function hash(pass, salt, digits) {
+  function hash(passphrase, salt, digits) {
     /*
  Configure hash function parameters
 */
 
     if (!digits) digits = 128;
-    var keys = [pass];
+    var keys = [passphrase];
     if (Array.isArray(salt)) Array.prototype.push.apply(keys, salt);
     else keys.push(salt);
 
     /*
- Concatenate pass with salt(s)
+ Concatenate passphrase with salt(s)
 */
 
     var merged = record_separator;
@@ -151,14 +151,14 @@ var entropis = (function () {
  Encode data as base-64 string
 */
   //TODO: Bounds checking
-  function encode(pass, data) {
+  function encode(master, data) {
     if (data == null) data = "";
     else if (!(data instanceof String)) data = JSON.stringify(data);
     var result = "";
     var buffer = "";
     for (var i = 0; i < 16; ++i)
       buffer += toHex(Math.floor(Math.random() * 0xffffffff));
-    var seed = hash(pass, [buffer, new Date().getTime().toString()], 128);
+    var seed = hash(master, [buffer, new Date().getTime().toString()], 128);
     result += seed;
     var blob = "";
     var size = data.length;
@@ -168,7 +168,7 @@ var entropis = (function () {
     blob += asHex(data);
     var needed = blob.length;
     var pad = "";
-    var next = pass;
+    var next = master;
     while (pad.length <= needed) {
       next = hash(next, seed, -1);
       pad += next;
@@ -208,7 +208,7 @@ var entropis = (function () {
  Decode data from base-64 string
 */
   //TODO: Bounds checking
-  function decode(pass, base64) {
+  function decode(master, base64) {
     //    if (!base64) base64 = "";
     var result = "";
     var hex = base64ToHex(base64);
@@ -216,7 +216,7 @@ var entropis = (function () {
     var encoded = hex.substr(128, base64.length);
     var elen = encoded.length;
     var pad = "";
-    var next = pass;
+    var next = master;
     while (pad.length < elen) {
       next = hash(next, seed, -1);
       pad += next;
@@ -249,30 +249,30 @@ var entropis = (function () {
     return result;
   }
 
-  function get(pass, name) {
+  function get(master, domain) {
     if (entropis.storage == null) return {};
-    var data = decode(pass, entropis.storage);
+    var data = decode(master, entropis.storage);
     if (data == null) return null;
-    var passwords;
+    var datastore;
     try {
-      passwords = JSON.parse(data);
+      datastore = JSON.parse(data);
     } catch (exception) {
       return null;
     }
-    return name == null ? passwords : passwords[name];
+    return domain == null ? datastore : datastore[domain];
   }
 
-  function set(pass, name, value) {
-    var passwords = get(pass);
-    if (passwords == null) return null;
-    if (value === undefined) return null 
-    if (value == null) delete passwords[name];
-    else passwords[name] = value;
-    return (entropis.storage = encode(pass, passwords));
+  function set(master, domain, password) {
+    var datastore = get(master);
+    if (datastore == null) return null;
+    if (password === undefined) return null 
+    if (password == null) delete datastore[domain];
+    else datastore[domain] = password;
+    return (entropis.storage = encode(master, datastore));
   }
   
-  function remove(pass, name) {
-   return set(pass, name, null)
+  function remove(master, domain) {
+   return set(master, domain, null)
   }  
 
   function clear() {
