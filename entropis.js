@@ -278,7 +278,7 @@ var entropis = (function () {
     entropis.storage = null;
   }
 
-  return { hash, encode, decode, get, set, remove, clear, storage: null };
+  return { hash, encode, decode, get, set, remove, clear };
 })();
 
 if (typeof module !== "undefined") module.exports = entropis;
