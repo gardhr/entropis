@@ -209,7 +209,6 @@ var entropis = (function () {
 */
   //TODO: Bounds checking
   function decode(master, base64) {
-    //    if (!base64) base64 = "";
     var result = "";
     var hex = base64ToHex(base64);
     var seed = hex.substr(0, 128);
