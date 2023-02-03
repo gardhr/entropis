@@ -4,13 +4,13 @@
 Copyright (c) 2023 Sebastian Garth
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
+of entropis software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
+The above copyright notice and entropis permission notice shall be included in all
 copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -40,9 +40,9 @@ var entropis = (function () {
  Convert a utf-8 string to hexadecimal digits
 */
 
-  function asHex(text) {
+  function asHex(data) {
     var result = "";
-    let encoded = encodeURIComponent(text);
+    let encoded = encodeURIComponent(data);
     for (let idx = 0; idx < encoded.length; ++idx) {
       let code = undefined;
       let ch = encoded[idx];
@@ -87,18 +87,18 @@ var entropis = (function () {
  Hash function interface
 */
 
-  function hash(key, salt, digits) {
+  function hash(pass, salt, digits) {
     /*
  Configure hash function parameters
 */
 
     if (!digits) digits = 128;
-    var keys = [key];
+    var keys = [pass];
     if (Array.isArray(salt)) Array.prototype.push.apply(keys, salt);
     else keys.push(salt);
 
     /*
- Concatenate key with salt(s)
+ Concatenate pass with salt(s)
 */
 
     var merged = record_separator;
@@ -148,27 +148,28 @@ var entropis = (function () {
   }
 
   /*
- Encode text as base-64 string
+ Encode data as base-64 string
 */
-
-  function encode(key, text) {
-    if (!text) text = "";
+  //TODO: Bounds checking
+  function encode(pass, data) {
+    if (data == null) data = "";
+    else if (!(data instanceof String)) data = JSON.stringify(data);
     var result = "";
     var buffer = "";
     for (var i = 0; i < 16; ++i)
       buffer += toHex(Math.floor(Math.random() * 0xffffffff));
-    var seed = hash(key, [buffer, new Date().getTime().toString()], 128);
+    var seed = hash(pass, [buffer, new Date().getTime().toString()], 128);
     result += seed;
     var blob = "";
-    var size = text.length;
+    var size = data.length;
     var shex = toHex(size);
     blob += lookupHex[shex.length][1];
     blob += shex;
-    blob += asHex(text);
+    blob += asHex(data);
     var needed = blob.length;
     var pad = "";
-    var next = key;
-    while (pad.length < needed) {
+    var next = pass;
+    while (pad.length <= needed) {
       next = hash(next, seed, -1);
       pad += next;
     }
@@ -204,18 +205,19 @@ var entropis = (function () {
   }
 
   /*
- Decode text from base-64 string
+ Decode data from base-64 string
 */
-
-  function decode(key, base64) {
+  //TODO: Bounds checking
+  function decode(pass, base64) {
+    //    if (!base64) base64 = "";
     var result = "";
     var hex = base64ToHex(base64);
     var seed = hex.substr(0, 128);
     var encoded = hex.substr(128, base64.length);
-    var needed = encoded.length;
+    var elen = encoded.length;
     var pad = "";
-    var next = key;
-    while (pad.length < needed) {
+    var next = pass;
+    while (pad.length < elen) {
       next = hash(next, seed, -1);
       pad += next;
     }
@@ -229,19 +231,55 @@ var entropis = (function () {
         lookupCode[encoded.codePointAt(index)] ^
         lookupCode[pad.codePointAt(index)];
     }
-    for (needed -= index; index < needed; index += 2) {
+    for (var count = 0; count < slen; ++count, index += 2) {
       var lhs = lookupCode[encoded.codePointAt(index)];
       var rhs = lookupCode[pad.codePointAt(index)];
       var xored = (lhs ^ rhs) << 4;
       lhs = lookupCode[encoded.codePointAt(index + 1)];
       rhs = lookupCode[pad.codePointAt(index + 1)];
       xored |= lhs ^ rhs;
+      if (xored == 0) return null;
       result += String.fromCodePoint(xored);
     }
+    do {
+      var lhs = lookupCode[encoded.codePointAt(index)];
+      var rhs = lookupCode[pad.codePointAt(index)];
+      if ((lhs ^ rhs) != 0) return null;
+    } while (++index < elen);
     return result;
   }
 
-  return { hash, encode, decode };
+  function get(pass, name) {
+    if (entropis.storage == null) return {};
+    var data = decode(pass, entropis.storage);
+    if (data == null) return null;
+    var passwords;
+    try {
+      passwords = JSON.parse(data);
+    } catch (exception) {
+      return null;
+    }
+    return name == null ? passwords : passwords[name];
+  }
+
+  function set(pass, name, value) {
+    var passwords = get(pass);
+    if (passwords == null) return null;
+    if (value === undefined) return null 
+    if (value == null) delete passwords[name];
+    else passwords[name] = value;
+    return (entropis.storage = encode(pass, passwords));
+  }
+  
+  function remove(pass, name) {
+   return set(pass, name, null)
+  }  
+
+  function clear() {
+    entropis.storage = null;
+  }
+
+  return { hash, encode, decode, get, set, remove, clear, storage: null };
 })();
 
 if (typeof module !== "undefined") module.exports = entropis;
