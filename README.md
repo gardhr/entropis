@@ -12,6 +12,8 @@ Reliable password storage has become a problematic issue in recent years. Passwo
 
 ## API
 
+(WARNING: The API is not yet stable. In the meantime, expect breaking changes.)
+
 The current Javascript implementation supports the following operations:
 
 `entropis.hash(passphrase, salt, digits)`
