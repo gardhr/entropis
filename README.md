@@ -8,11 +8,11 @@
 
 ## Motivation
 
-Reliable password storage has become a problematic issue in recent years. Password managers have proven to be as prone as ever to security vulnerabilities, while at the same time only growing in complexity day by day. The goal of this project is to remedy that very situation: An open-source password manager based a few simple yet powerful building blocks and implemented in a variety of programming languages. Entropis uses a combination of finite-field mappings and a sponge construction to generate a secure hash from a passphrase and salt. It also provides an interface to encode and decode data as a base-64 string.
+Reliable password storage has become a problematic issue in recent years. Password managers have proven to be as prone as ever to security vulnerabilities, while at the same time only growing in complexity day by day. The goal of this project is to remedy that very situation: to develop an open-source password manager based a few simple yet powerful building blocks and implemented in a variety of programming languages. Entropis combines finite-field mappings with a sponge construction to generate a secure hash from a passphrase and salt. It also provides an interface to encode and decode data as a base-64 string.
 
 ## API
 
-(WARNING: The API is not yet stable. In the meantime, expect breaking changes.)
+(WARNING: The API is not yet stable and thus subject to change without notice.)
 
 The current Javascript implementation supports the following operations:
 
