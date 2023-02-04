@@ -151,24 +151,23 @@ var entropis = (function () {
  Encode data as base-64 string
 */
   //TODO: Bounds checking
-  function encode(master, data) {
-    if (data == null) data = "";
-    else if (!(data instanceof String)) data = JSON.stringify(data);
+  function encode(passphrase, text) {
+    if (text == null) text = "";
     var result = "";
     var buffer = "";
     for (var i = 0; i < 16; ++i)
       buffer += toHex(Math.floor(Math.random() * 0xffffffff));
-    var seed = hash(master, [buffer, new Date().getTime().toString()], 128);
+    var seed = hash(passphrase, [buffer, new Date().getTime().toString()], 128);
     result += seed;
     var blob = "";
-    var size = data.length;
+    var size = text.length;
     var shex = toHex(size);
     blob += lookupHex[shex.length][1];
     blob += shex;
-    blob += asHex(data);
+    blob += asHex(text);
     var needed = blob.length;
     var pad = "";
-    var next = master;
+    var next = passphrase;
     while (pad.length <= needed) {
       next = hash(next, seed, -1);
       pad += next;
@@ -208,14 +207,14 @@ var entropis = (function () {
  Decode data from base-64 string
 */
   //TODO: Bounds checking
-  function decode(master, base64) {
+  function decode(passphrase, base64) {
     var result = "";
     var hex = base64ToHex(base64);
     var seed = hex.substr(0, 128);
     var encoded = hex.substr(128, base64.length);
     var elen = encoded.length;
     var pad = "";
-    var next = master;
+    var next = passphrase;
     while (pad.length < elen) {
       next = hash(next, seed, -1);
       pad += next;
@@ -248,9 +247,9 @@ var entropis = (function () {
     return result;
   }
 
-  function get(master, domain) {
+  function get(passphrase, domain) {
     if (entropis.storage == null) return {};
-    var data = decode(master, entropis.storage);
+    var data = decode(passphrase, entropis.storage);
     if (data == null) return null;
     var datastore;
     try {
@@ -261,17 +260,17 @@ var entropis = (function () {
     return domain == null ? datastore : datastore[domain];
   }
 
-  function set(master, domain, password) {
-    var datastore = get(master);
+  function set(passphrase, domain, password) {
+    var datastore = get(passphrase);
     if (datastore == null) return null;
     if (password === undefined) return null;
     if (password == null) delete datastore[domain];
     else datastore[domain] = password;
-    return (entropis.storage = encode(master, datastore));
+    return (entropis.storage = encode(passphrase, JSON.stringify(datastore)));
   }
 
-  function remove(master, domain) {
-    return set(master, domain, null);
+  function remove(passphrase, domain) {
+    return set(passphrase, domain, null);
   }
 
   function clear() {
