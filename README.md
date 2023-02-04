@@ -2,7 +2,7 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/gardhr/entropis/master/LICENSE.MIT)
 
-- [Goals](#goals)
+- [Motivation](#motivation)
 - [API](#api)
 - [License](#license)
 
