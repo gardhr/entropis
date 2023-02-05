@@ -272,9 +272,13 @@ var entropis = (function () {
   function remove(passphrase, domain) {
     return set(passphrase, domain, null);
   }
+  
+  function reset(passphrase, domain) {
+    return set(passphrase, domain, null);
+  }  
 
   function clear(passphrase) {
-    if (!get(passphrase)) return null;
+    if (!get(passphrase)) return false;
     entropis.storage = null;
     return true;
   }
