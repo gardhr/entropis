@@ -32,3 +32,6 @@ console.log(
   entropis.set("foo", domain, another)
 );
 console.log("entropis.get(pass, domain):", entropis.get(pass, domain));
+var newpass = "!@ChurchillWa$NoNovice"
+console.log("entropis.change(pass, domain):", entropis.change(pass, newpass));
+console.log("entropis.get(newpass, domain):", entropis.get(newpass, domain));
