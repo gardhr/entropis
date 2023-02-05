@@ -44,7 +44,7 @@ Securely retrieves the password for a given domain from the internal datastore u
 
 Deletes the internal datastore protected by a master passphrase. (Note: If `passphrase` is null, the internal state is unconditionally reset.)
 
-`change(oldphrase, newphrase)`
+`entropis.change(oldphrase, newphrase)`
 
 Re-encodes the internal datastore protected by master passphrase `oldphrase` with the new passphrase `newphrase`.
 
