@@ -285,7 +285,7 @@ var entropis = (function () {
     return (entropis.storage = encode(newphrase, JSON.stringify(datastore)));
   }
 
-  return { hash, encode, decode, get, set, remove, clear };
+  return { hash, encode, decode, get, set, remove, clear, change };
 })();
 
 if (typeof module !== "undefined") module.exports = entropis;
