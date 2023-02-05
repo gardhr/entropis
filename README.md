@@ -46,7 +46,7 @@ Deletes the internal datastore protected by a master passphrase. (Note: If `pass
 
 `entropis.change(oldphrase, newphrase)`
 
-Re-encodes the internal datastore protected by master passphrase `oldphrase` with the new passphrase `newphrase`.
+Re-encodes the internal datastore protected by master passphrase `oldphrase` with the new passphrase `newphrase`. Returns the updated base64 representation of the datastore.
 
 ## License
 
