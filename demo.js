@@ -8,11 +8,13 @@ let salt;
 if (argc > 2) salt = argv[2];
 let digits;
 if (argc > 3) digits = Number(argv[3]);
-console.log("hash:", entropis.hash(pass, salt, digits));
-var enc = entropis.encode(pass, argv[0]);
-console.log("encode:", enc);
-var dec = entropis.decode(pass, enc);
-console.log("decode:", dec);
+console.log(
+  "entropis.hash(pass, salt, digits):",
+  entropis.hash(pass, salt, digits)
+);
+var encoded = entropis.encode(pass, argv[0]);
+console.log("entropis.encode(pass, argv[0]):", encoded);
+console.log("entropis.decode(pass, encoded):", entropis.decode(pass, encoded));
 var domain = "example.com";
 var another = "MyReallyStrongPassword#923333";
 console.log(
