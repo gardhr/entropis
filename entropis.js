@@ -81,6 +81,8 @@ var entropis = (function () {
   /*
  "Highly-probable" safe primes (on the order of 99.99999% certainty)
  TODO: Replace with suitable certified primes
+ FIXME: Will need to implement a `rounds` parameter or some
+  such to prevent efficient brute-forcing of passphrase 
 */
   var alpha = BigInt(
     "90086843365112375319585743415488659286349207571888" +
