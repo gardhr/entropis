@@ -55,7 +55,6 @@
         }
         if (Object.keys(passwords).length == 0)
           return status("Password list is empty");
-        var index = 0;
         for (var domain in passwords) {
           var row = create("tr");
           listing.appendChild(row);
@@ -131,8 +130,7 @@
       }
 
       function remove(domain) {
-        var passphrase = value("passphrase");
-        if (!entropis.remove(passphrase, domain))
+        if (!entropis.remove(value("passphrase"), domain))
           return error("Cannot remove entry (incorrect master password)");
         refresh();
       }
