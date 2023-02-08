@@ -60,10 +60,10 @@ var entropis = (function () {
   }
 
   /*
- Certified safe primes (source: primes.utm.edu)
+ FIXME: These parameters aren't very browser-friendly
 */
-
   /*
+// Certified safe primes (source: primes.utm.edu)  
   // #57461 [2006]
   var alpha =
     (BigInt(137211941292195) * BigInt(2) ** BigInt(171960) - BigInt(1)) *
@@ -78,6 +78,10 @@ var entropis = (function () {
   var block_size = 1 << 16;
 */
 
+  /*
+ "Highly-probable" safe primes (on the order of 99.99999% certainty)
+ TODO: Replace with suitable certified primes
+*/
   var alpha = BigInt(
     "90086843365112375319585743415488659286349207571888" +
       "72143870468294068098052833612962771759906636851615" +
