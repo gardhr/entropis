@@ -33,8 +33,12 @@
         return reset_html("errors", "Error: " + message);
       }
 
+      function status(message) {
+        reset_html("status", message || "");
+      }
+
       function refresh(passwords) {
-        reset_html("status");
+        status(null);
         reset_html("errors");
         reset_input("domain");
         reset_input("password");
@@ -50,7 +54,7 @@
           if (passwords == null) return error("Incorrect master password");
         }
         if (Object.keys(passwords).length == 0)
-          reset_html("status", "Password list is empty");
+          return status("Password list is empty");
         var index = 0;
         for (var domain in passwords) {
           var row = create("tr");
@@ -146,7 +150,7 @@
         refresh(found);
         var count = Object.keys(found).length;
         var suffix = count == 1 ? "" : "es";
-        reset_html("status", count + " match" + suffix + " found");
+        status(count + " match" + suffix + " found");
       }
 
       function drop() {
