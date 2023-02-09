@@ -191,7 +191,7 @@
         var passphrase = value("passphrase");
         if (passphrase == "") {
           progress.style.display = "none";
-          return status("Please enter passphrase");
+          return status("Please enter your master passphrase");
         }
         progress.style.display = "block";
         var entropy = strict_password_entropy(passphrase);
@@ -279,9 +279,7 @@
         </tr>
       </table>
     </form>
-    <p id="status" align="center" style="color: #50366d; word-wrap: break-word">
-      Please enter your master passphrase
-    </p>
+    <p id="status" align="center" style="color: #50366d; word-wrap: break-word"></p>
     <form onsubmit="" action="javascript:void(0)">
       <table id="listing" align="center" style=""></table>
     </form>
