@@ -4,6 +4,18 @@
     <title>Entropis Password Manager</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      #progress {
+        color: black;
+        width: 100%;
+        background-color: red;
+      }
+      #bar {
+        width: 0%;
+        height: 30px;
+        background-color: green;
+      }
+    </style>
     <script src="entropis.js"></script>
     <script>
       entropis.storage = localStorage.getItem("entropis");
@@ -160,6 +172,38 @@
           entropis.storage = null;
         refresh();
       }
+
+      function strict_password_entropy(password) {
+        var length = password.length;
+        if (length == 0) return 0;
+        var present = new Array(256);
+        for (var index = 0; index < password.length; ++index)
+          present[password.codePointAt(index)] = true;
+        var unique = 0;
+        for (var index = 0; index < 256; ++index) if (present[index]) ++unique;
+        return Math.floor((length * Math.log(unique)) / Math.log(2));
+      }
+
+      var criteria = 100;
+
+      function critique() {
+        var progress = element("progress");
+        var passphrase = value("passphrase");
+        if (passphrase == "") {
+          progress.style.display = "none";
+          return status("Please enter passphrase");
+        }
+        progress.style.display = "block";
+        var entropy = strict_password_entropy(passphrase);
+        var ratio = entropy / criteria;
+        if (ratio >= 1) ratio = 1;
+        element("bar").style.width = Math.floor(ratio * 100) + "%";
+        var ratings = ["weak", "poor", "fair", "good", "excellent"];
+        var index = Math.floor(ratio * ratings.length);
+        if (index == ratings.length) --index;
+        var score = ratings[index];
+        reset_html("bar", "&nbsp" + score);
+      }
     </script>
   </head>
   <body
@@ -170,7 +214,7 @@
       font-size: 20px;
       font-weight: bold;
     "
-    onload=""
+    onload="element('passphrase').addEventListener('keyup', critique), critique()"
   >
     <div align="left">
       <a href="https://github.com/gardhr/entropis">GitHub</a>
@@ -197,6 +241,13 @@
           <td>
             <input type="password" id="passphrase" onfocus="this.select()" />
             <input type="submit" value="unlock" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div id="progress">
+              <div id="bar"></div>
+            </div>
           </td>
         </tr>
       </table>
@@ -228,11 +279,9 @@
         </tr>
       </table>
     </form>
-    <p
-      id="status"
-      align="center"
-      style="color: #50366d; word-wrap: break-word"
-    >Please enter your master passphrase</p>
+    <p id="status" align="center" style="color: #50366d; word-wrap: break-word">
+      Please enter your master passphrase
+    </p>
     <form onsubmit="" action="javascript:void(0)">
       <table id="listing" align="center" style=""></table>
     </form>
