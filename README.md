@@ -3,12 +3,17 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/gardhr/entropis/master/LICENSE.MIT)
 
 - [Motivation](#motivation)
+- [Status](#status)
 - [API](#api)
 - [License](#license)
 
 ## Motivation
 
 Reliable password storage has become a problematic issue in recent years. Password managers have proven to be as prone as ever to security vulnerabilities, while at the same time only growing in complexity day by day. The goal of this project is to remedy that very situation: to develop an open-source password manager based a few simple yet powerful building blocks and implemented in a variety of programming languages. Entropis combines finite-field mappings with a sponge construction to generate a secure hash from a passphrase and salt. It also provides an interface to encode and decode data as a base-64 string.
+
+## Status
+
+The status of this project is currently "experimental" phase. There seems to be a major issue with browser BigInt implementations (not) being able to handle the computations involved. Testing with node.js however does look pretty promising, and no doubt a C/C++ version will likely perform even better still.
 
 ## API
 
