@@ -1,0 +1,22 @@
+{
+  "name": "entropis",
+  "version": "0.0.10",
+  "description": "password manager",
+  "main": "entropist.js",
+  "scripts": {
+    "test": "node demo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gardhr/entropis.git"
+  },
+  "keywords": [
+    "password-manager"
+  ],
+  "author": "Garðr",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gardhr/entropis/issues"
+  },
+  "homepage": "https://github.com/gardhr/entropis#readme"
+}
