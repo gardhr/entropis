@@ -3,9 +3,6 @@
   "version": "0.0.10",
   "description": "password manager",
   "main": "entropist.js",
-  "dependencies": [
-    
-  ],
   "scripts": {
     "test": "node demo"
   },
