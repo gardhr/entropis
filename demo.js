@@ -10,7 +10,6 @@ if (argc > 2) salt = argv[2];
 let digits;
 if (argc > 3) digits = Number(argv[3]);
 log("entropis.hash(pass, salt, digits):", entropis.hash(pass, salt, digits));
-return
 var encoded = entropis.encode(pass, argv[0]);
 log("entropis.encode(pass, argv[0]):", encoded);
 log("entropis.decode(pass, encoded):", entropis.decode(pass, encoded));
