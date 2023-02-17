@@ -159,14 +159,17 @@ var entropis = (function () {
   Sponge construction; extract hash from our buffer
 */
 
-      var current = buffer.length - 1;
-      while (current > 2) {
-        var offset =
-          (nybble(buffer, current) << 4) | nybble(buffer, current - 1);
-        current -= 2;
-        if (current <= offset) break;
-        current -= offset;
-        result += buffer.charAt(current);
+      var eod = buffer.length;
+      var left = 0;
+      var right = eod - 1;
+      for (;;) {
+        var roff = (nybble(buffer, right) << 4) | nybble(buffer, right - 1);
+        var loff = (nybble(buffer, left) << 4) | nybble(buffer, left + 1);
+        if (right <= roff + 1 + 3) break;
+        right -= roff + 1;
+        left += loff + 1;
+        if (left >= eod - 3) break;
+        result += hexChars[nybble(buffer, left++) ^ nybble(buffer, right--)];
       }
       if (digits < 0) return result;
     } while (result.length < digits);
@@ -232,6 +235,8 @@ var entropis = (function () {
 */
   //TODO: Bounds checking
   function decode(passphrase, base64) {
+    base64 = base64.trim();
+    //console.log("base64: `" + base64 + "`")
     var result = "";
     var temp = "";
     for (
