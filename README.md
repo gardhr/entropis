@@ -37,13 +37,13 @@ Converts a base-64 encoded datastore to text. (Note: Does NOT modify the interna
 
 Securely stores the password for a given domain within the internal datastore using a master passphrase. Returns the updated base64 representation of the datastore.
 
-`entropis.remove(passphrase, domain)`
-
-Securely deletes the entry for a given domain within the internal datastore using a master passphrase. Returns the updated base64 representation of the datastore.
-
 `entropis.get(passphrase, domain)`
 
 Securely retrieves the password for a given domain from the internal datastore using a master passphrase. If `domain` is null, an object containing all passwords in the datastore is returned.
+
+`entropis.remove(passphrase, domain)`
+
+Securely deletes the entry for a given domain within the internal datastore using a master passphrase. Returns the updated base64 representation of the datastore.
 
 `entropis.clear(passphrase)`
 
