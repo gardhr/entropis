@@ -1,0 +1,16 @@
+const entropis = require("./entropis");
+const log = console.log;
+let argv = process.argv.slice(1);
+let argc = argv.length;
+if (argc < 3) return log("Usage:", argv[0], "[PASSPHRASE] [INPUT] [OUTPUT]");
+let pass;
+if (argc > 1) pass = argv[1];
+let input;
+if (argc > 2) input = argv[2];
+let output;
+if (argc > 3) output = argv[3];
+const { fileExists, readFileText, writeFileText } = require("./common");
+if (fileExists(input)) input = readFileText(input);
+let result = entropis.decode(pass, input);
+if (output == null) log(result);
+else writeFileText(output, result);
