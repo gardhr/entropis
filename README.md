@@ -13,7 +13,8 @@ Reliable password storage has become a problematic issue in recent years. Passwo
 
 ## Status
 
-The status of this project is currently "experimental" phase. There seems to be a major issue with browser BigInt implementations (not) being able to handle the computations involved. Testing with node.js does however look pretty promising, and no doubt a C/C++ version will likely perform even better still.
+*WARNING*
+The status of this project is currently "experimental" phase (v0.0.20). There seems to be a major issue with browser BigInt implementations (not) being able to handle the computations involved. Testing with node.js does however look pretty promising, and no doubt a C/C++ version will likely perform even better still.
 
 ## API
 
