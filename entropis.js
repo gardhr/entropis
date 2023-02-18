@@ -236,7 +236,6 @@ var entropis = (function () {
   //TODO: Bounds checking
   function decode(passphrase, base64) {
     base64 = base64.trim();
-    //console.log("base64: `" + base64 + "`")
     var result = "";
     var temp = "";
     for (
