@@ -12,5 +12,6 @@ if (argc > 3) output = argv[3];
 const { fileExists, readFileText, writeFileText } = require("./common");
 if (fileExists(input)) input = readFileText(input);
 let result = entropis.decode(pass, input);
+if (result == null) return console.error("Error: incorrect passphrase!");
 if (output == null) log(result);
 else writeFileText(output, result);
