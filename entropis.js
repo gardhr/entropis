@@ -90,15 +90,16 @@ var entropis = (function () {
  FIXME: These parameters aren't very browser-friendly
 */
   // Certified safe primes (source: primes.utm.edu)
-  // #57461 [2006]
-  var alpha =
-    (BigInt(137211941292195) * BigInt(2) ** BigInt(171960) - BigInt(1)) *
-      BigInt(2) +
-    BigInt(1);
 
   // #59419 [2021]
-  var beta =
+  var alpha =
     (BigInt(4318624617) * BigInt(2) ** BigInt(152849) - BigInt(1)) * BigInt(2) +
+    BigInt(1);
+
+  // #57461 [2006]
+  var beta =
+    (BigInt(137211941292195) * BigInt(2) ** BigInt(171960) - BigInt(1)) *
+      BigInt(2) +
     BigInt(1);
 
   var block_size = 1 << 16;
