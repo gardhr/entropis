@@ -1,5 +1,7 @@
 # entropis
 
+Note: a crude (and extremely sluggish!) web interface can be found [here](https://gardhr.github.io/entropis/).
+
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/gardhr/entropis/master/LICENSE.MIT)
 
 - [Motivation](#motivation)
