@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Entropis Password Manager</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      #progress {
+        color: black;
+        width: 100%;
+        background-color: red;
+      }
+      #bar {
+        width: 0%;
+        height: 30px;
+        background-color: green;
+      }
+    </style>
+    <script src="entropis.js"></script>
+    <script>
+      var visible = false;
+
+      function element(id) {
+        return document.getElementById(id);
+      }
+
+      function reset_html(id, text) {
+        element(id).innerHTML = text || "";
+      }
+
+      function reset_input(id, text) {
+        element(id).value = text || "";
+      }
+
+      function warn(message) {
+        reset_html("warnings", "Warning: " + message);
+      }
+
+      function toggle() {
+        var passphrase = element("passphrase");
+        var visibility = element("visibility");
+        visible = !visible;
+        if (visible) {
+          passphrase.type = "text";
+          visibility.value = "hide";
+        } else {
+          passphrase.type = "password";
+          visibility.value = "show";
+        }
+      }
+
+      function generate() {
+        var passphrase = value("passphrase");
+        var trimmed = passphrase.trim();
+        if (passphrase != trimmed) {
+          warn("pass phrase contains leading/trailing spaces");
+        }
+        reset_html("output", entropis.hash(passphrase));
+      }
+
+      function strict_password_entropy(password) {
+        var length = password.length;
+        if (length == 0) return 0;
+        var present = new Array(256);
+        for (var index = 0; index < password.length; ++index)
+          present[password.codePointAt(index)] = true;
+        var unique = 0;
+        for (var index = 0; index < 256; ++index) if (present[index]) ++unique;
+        return Math.floor((length * Math.log(unique)) / Math.log(2));
+      }
+
+      var criteria = 150;
+
+      function critique() {
+        var progress = element("progress");
+        var passphrase = value("passphrase");
+        if (passphrase == "") {
+          progress.style.display = "none";
+          return;
+        }
+        progress.style.display = "block";
+        var entropy = strict_password_entropy(passphrase);
+        var ratio = entropy / criteria;
+        if (ratio >= 1) ratio = 1;
+        element("bar").style.width = Math.floor(ratio * 100) + "%";
+        var ratings = ["weak", "poor", "fair", "good", "excellent"];
+        var index = Math.floor(ratio * ratings.length);
+        if (index == ratings.length) --index;
+        var score = ratings[index];
+        reset_html("bar", "&nbsp" + score);
+      }
+    </script>
+  </head>
+  <body
+    style="
+      background-color: #ffffff;
+      color: #000000;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+    "
+    onload="element('passphrase').addEventListener('keyup', critique)"
+  >
+    <div align="left">
+      <a href="https://github.com/gardhr/entropis">GitHub</a>
+    </div>
+    <br />
+    <h2 align="center">Entropis Hash Calculator</h2>
+    <br />
+    <form onsubmit="generate()" action="javascript:void(0)">
+      <table align="center" style="">
+        <tr>
+          <td>
+            Passphrase &nbsp;
+            <input
+              type="button"
+              id="visibility"
+              value="show"
+              onclick="toggle()"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="password" id="passphrase" onfocus="this.select()" />
+            <input type="submit" value="generate" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div id="progress">
+              <div id="bar"></div>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </form>
+    <p
+      id="warnings"
+      align="center"
+      style="color: #50366d; word-wrap: break-word"
+    ></p>
+    <p
+      id="output"
+      align="center"
+      style="color: #50366d; word-wrap: break-word"
+    ></p>
+  </body>
+</html>
