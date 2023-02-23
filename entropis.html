@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Entropis Password Manager</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      #progress {
+        color: black;
+        width: 100%;
+        background-color: red;
+      }
+      #bar {
+        width: 0%;
+        height: 30px;
+        background-color: green;
+      }
+    </style>
+    <script>
+      /*
+ License: MIT
+
+Copyright (c) 2023 Sebastian Garth
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of entropis software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and entropis permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+      var entropis = (function () {
+        function char(ch) {
+          return ch.codePointAt(0);
+        }
+
+        /*
+ Static lookup tables
+*/
+        var hexChars = "0123456789abcdef";
+        var byteToHex = new Array(256);
+        for (var index = 0; index < 256; ++index)
+          byteToHex[index] =
+            hexChars.charAt(index >> 4) + hexChars.charAt(index & 0xf);
+
+        var hexCodeToNybble = new Array(256);
+        var counter = 0;
+        for (var index = char("0"), nine = char("9"); index <= nine; ++index)
+          hexCodeToNybble[index] = counter++;
+        for (var index = char("a"), f = char("f"); index <= f; ++index)
+          hexCodeToNybble[index] = counter++;
+
+        // RFC#4648 "URL and Filename safe" base-64 encoding
+
+        var base64Chars =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+        var base64CodeTo6Bits = new Array(256);
+        var counter = 0;
+        for (var index = char("A"), Z = char("Z"); index <= Z; ++index)
+          base64CodeTo6Bits[index] = counter++;
+        for (var index = char("a"), z = char("z"); index <= z; ++index)
+          base64CodeTo6Bits[index] = counter++;
+        for (var index = char("0"), nine = char("9"); index <= nine; ++index)
+          base64CodeTo6Bits[index] = counter++;
+        base64CodeTo6Bits[char("-")] = counter++;
+        base64CodeTo6Bits[char("_")] = counter++;
+
+        /*
+ Convert a utf-8 string to hexadecimal digits
+*/
+
+        function asHex(data) {
+          var result = "";
+          let encoded = encodeURIComponent(data);
+          for (let index = 0; index < encoded.length; ++index) {
+            let code = undefined;
+            let ch = encoded[index];
+            if (ch == "%") {
+              code = Number("0x" + encoded[index + 1] + encoded[index + 2]);
+              index += 2;
+            } else code = char(ch);
+            result += byteToHex[code];
+          }
+          return result;
+        }
+
+        function toHex(value) {
+          return value.toString(16);
+        }
+
+        function nybble(hex, index) {
+          return hexCodeToNybble[hex.codePointAt(index)];
+        }
+
+        /*
+ FIXME: These parameters aren't very browser-friendly
+*/
+        // Certified safe primes (source: primes.utm.edu)
+
+        // #59419 [2021]
+        var alpha =
+          (BigInt(4318624617) * BigInt(2) ** BigInt(152849) - BigInt(1)) *
+            BigInt(2) +
+          BigInt(1);
+
+        // #57461 [2006]
+        var beta =
+          (BigInt(137211941292195) * BigInt(2) ** BigInt(171960) - BigInt(1)) *
+            BigInt(2) +
+          BigInt(1);
+
+        var block_size = 1 << 16;
+
+        /*
+ Separators, for immalleability purposes
+*/
+
+        var record_separator = asHex("\u001e");
+        var field_separator = asHex("\u001c");
+
+        /*
+ Hash function interface
+*/
+
+        function hash(passphrase, salt, digits) {
+          /*
+ Configure hash function parameters
+*/
+
+          if (!digits) digits = 128;
+          var keys = [passphrase];
+          if (Array.isArray(salt)) Array.prototype.push.apply(keys, salt);
+          else keys.push(salt);
+
+          /*
+ Concatenate passphrase with salt(s)
+*/
+
+          var merged = record_separator;
+          for (var index = 0, limit = keys.length; index < limit; ++index) {
+            var next = keys[index];
+            if (next != null && next != "") merged += asHex(next);
+            merged += field_separator;
+          }
+          var value = BigInt("0x" + merged);
+
+          /*
+  Build the result
+*/
+          var result = "";
+
+          do {
+            var buffer = "";
+            do {
+              // Stretch the current state
+              var hexadecimal = value.toString(16);
+              var stretched = hexadecimal;
+              do {
+                stretched += record_separator + hexadecimal;
+              } while (stretched.length <= block_size);
+              // Pass value through finite-field mapping
+              value = (alpha * BigInt("0x" + stretched)) % beta;
+              buffer += value.toString(16);
+            } while (buffer.length <= block_size);
+
+            /*
+  Sponge construction; extract hash from our buffer
+*/
+
+            var eod = buffer.length;
+            var left = 0;
+            var right = eod - 1;
+            for (;;) {
+              var roff =
+                (nybble(buffer, right) << 4) | nybble(buffer, right - 1);
+              var loff = (nybble(buffer, left) << 4) | nybble(buffer, left + 1);
+              if (right <= roff + 1 + 3) break;
+              right -= roff + 1;
+              left += loff + 1;
+              if (left >= eod - 3) break;
+              result +=
+                hexChars[nybble(buffer, left++) ^ nybble(buffer, right--)];
+            }
+            if (digits < 0) return result;
+          } while (result.length < digits);
+          return result.substr(0, digits);
+        }
+
+        /*
+ Encode data as base-64 string
+*/
+        //TODO: Bounds checking
+
+        function encode(passphrase, text) {
+          if (text == null) text = "";
+          var blob = "";
+          var hex = "";
+          var buffer = "";
+          for (var i = 0; i < 16; ++i)
+            buffer += toHex(Math.floor(Math.random() * 0xffffffff));
+          var seed = hash(
+            passphrase,
+            [buffer, new Date().getTime().toString()],
+            128
+          );
+          hex += seed;
+          var size = text.length;
+          var shex = toHex(size);
+          blob += byteToHex[shex.length][1];
+          blob += shex;
+          blob += asHex(text);
+          var needed = blob.length;
+          var wiggle = needed + 64;
+          var pad = "";
+          var current = passphrase;
+          while (pad.length < wiggle) {
+            current = hash(current, seed, -1);
+            pad += current;
+          }
+          var next;
+          for (next = 0; next < needed; ++next) {
+            var lhs = nybble(blob, next);
+            var rhs = nybble(pad, next);
+            var xored = lhs ^ rhs;
+            hex += hexChars[xored];
+          }
+          var limit = pad.length - Math.floor((128 + pad.length) % 6);
+          while (next < limit) hex += pad.charAt(next++);
+          var length = hex.length;
+          var base64 = "";
+          for (var index = 0; index < length; index += 6) {
+            var value = 0;
+            for (var offset = 0; offset < 6; ++offset) {
+              var seek = index + offset;
+              if (seek >= length) break;
+              value <<= 4;
+              value += nybble(hex, seek);
+            }
+            for (var outdex = 0; outdex < 4; ++outdex) {
+              base64 += base64Chars.charAt(value & 0x3f);
+              value >>= 6;
+            }
+          }
+          return base64;
+        }
+
+        /*
+ Decode data from base-64 string
+*/
+        //TODO: Bounds checking
+        function decode(passphrase, base64) {
+          base64 = base64.trim();
+          var result = "";
+          var temp = "";
+          for (
+            var length = base64.length, index = length - 1;
+            index > 0;
+            index -= 4
+          ) {
+            var value = 0;
+            for (var offset = 0; offset < 4; ++offset) {
+              var seek = index - offset;
+              if (seek < 0) break;
+              value <<= 6;
+              value += base64CodeTo6Bits[base64.codePointAt(seek)];
+            }
+            for (var outdex = 0; outdex < 6; ++outdex) {
+              temp += hexChars.charAt(value & 0xf);
+              value >>= 4;
+            }
+          }
+          var hex = "";
+          for (
+            var length = temp.length, index = length - 1;
+            index > 0;
+            index--
+          ) {
+            hex += temp[index];
+          }
+          var seed = hex.substr(0, 128);
+          var encoded = hex.substr(128, hex.length);
+          var elen = encoded.length;
+          var pad = "";
+          var current = passphrase;
+          while (pad.length < elen) {
+            current = hash(current, seed, -1);
+            pad += current;
+          }
+          var slen = 0;
+          var hlen = nybble(encoded, 0) ^ nybble(pad, 0);
+          for (index = 1; index <= hlen; ++index) {
+            slen <<= 4;
+            slen += nybble(encoded, index) ^ nybble(pad, index);
+          }
+          for (var count = 0; count < slen; ++count, index += 2) {
+            var xored = (nybble(encoded, index) ^ nybble(pad, index)) << 4;
+            xored |= nybble(encoded, index + 1) ^ nybble(pad, index + 1);
+            if (xored == 0) return null;
+            result += String.fromCodePoint(xored);
+          }
+          do {
+            if ((nybble(encoded, index) ^ nybble(pad, index)) != 0) return null;
+          } while (++index < elen);
+          return result;
+        }
+
+        function get(passphrase, domain) {
+          if (entropis.storage == null) return {};
+          var data = decode(passphrase, entropis.storage);
+          if (data == null) return null;
+          var datastore;
+          try {
+            datastore = JSON.parse(data);
+          } catch (exception) {
+            return null;
+          }
+          return domain == null ? datastore : datastore[domain];
+        }
+
+        function set(passphrase, domain, password) {
+          var datastore = get(passphrase);
+          if (datastore == null) return null;
+          if (password === undefined) return null;
+          if (password == null) delete datastore[domain];
+          else datastore[domain] = password;
+          return (entropis.storage = encode(
+            passphrase,
+            JSON.stringify(datastore)
+          ));
+        }
+
+        function remove(passphrase, domain) {
+          return set(passphrase, domain, null);
+        }
+
+        function clear(passphrase) {
+          if (passphrase != null && !get(passphrase)) return false;
+          entropis.storage = null;
+          return true;
+        }
+
+        function change(oldphrase, newphrase) {
+          var datastore = get(oldphrase);
+          if (datastore == null) return null;
+          return (entropis.storage = encode(
+            newphrase,
+            JSON.stringify(datastore)
+          ));
+        }
+
+        return { hash, encode, decode, get, set, remove, clear, change };
+      })();
+
+      if (typeof module !== "undefined") module.exports = entropis;
+      else if (typeof define === "function" && define.amd)
+        define(function () {
+          return entropis;
+        });
+    </script>
+    <script>
+      entropis.storage = localStorage.getItem("entropis");
+      var visible = false;
+
+      function element(id) {
+        return document.getElementById(id);
+      }
+
+      function reset_html(id, text) {
+        element(id).innerHTML = text || "";
+      }
+
+      function reset_input(id, text) {
+        element(id).value = text || "";
+      }
+
+      function value(id) {
+        return element(id).value;
+      }
+
+      function create(tag, options) {
+        return document.createElement(tag, options);
+      }
+
+      function error(message) {
+        return reset_html("errors", "Error: " + message);
+      }
+
+      function status(message) {
+        reset_html("status", message || "");
+      }
+
+      function refresh(passwords) {
+        status(null);
+        reset_html("errors");
+        reset_input("domain");
+        reset_input("password");
+        reset_html("listing");
+        try {
+          localStorage.setItem("entropis", entropis.storage);
+        } catch (exception) {
+          return error("Browser local storage is full and/or unavailable");
+        }
+        var listing = element("listing");
+        if (passwords == null) {
+          passwords = entropis.get(value("passphrase"));
+          if (passwords == null) return error("Incorrect master password");
+        }
+        if (Object.keys(passwords).length == 0)
+          return status("Password list is empty");
+        for (var domain in passwords) {
+          var row = create("tr");
+          listing.appendChild(row);
+          var td1 = create("td");
+          row.appendChild(td1);
+          var bcd = create("button");
+          bcd.innerText = "📋";
+          bcd.addEventListener("click", () => {
+            copy(domain);
+          });
+          td1.appendChild(bcd);
+          var inp1 = create("input");
+          var color = "#D3D3D3";
+          inp1.readOnly = true;
+          inp1.value = domain;
+          inp1.style.backgroundColor = color;
+          inp1.onFocus = "this.select()";
+          td1.appendChild(inp1);
+          var td2 = create("td");
+          row.appendChild(td2);
+          var bcp = create("button");
+          bcp.innerText = "📋";
+          bcp.addEventListener("click", () => {
+            copy(passwords[domain]);
+          });
+          td2.appendChild(bcp);
+          var inp2 = create("input");
+          if (visible) inp2.type = "text";
+          else inp2.type = "password";
+          inp2.readOnly = true;
+          inp2.value = passwords[domain];
+          inp2.style.backgroundColor = color;
+          inp2.onFocus = "this.select()";
+          td2.appendChild(inp2);
+          var b1 = create("button");
+          b1.innerText = "delete";
+          b1.addEventListener("click", () => {
+            remove(domain);
+          });
+          td2.appendChild(b1);
+        }
+      }
+
+      function toggle() {
+        var passphrase = element("passphrase");
+        var password = element("password");
+        var visibility = element("visibility");
+        visible = !visible;
+        if (visible) {
+          passphrase.type = "text";
+          password.type = "text";
+          visibility.value = "hide";
+        } else {
+          passphrase.type = "password";
+          password.type = "password";
+          visibility.value = "show";
+        }
+        refresh();
+      }
+
+      function update() {
+        var passphrase = value("passphrase");
+        var passwords = entropis.get(passphrase);
+        if (passwords == null)
+          return error("Cannot update (incorrect master password)");
+        var domain = value("domain").trim();
+        if (domain == "") return error("Domain cannot be empty");
+        var password = value("password");
+        var trimmed = password.trim();
+        if (password != trimmed) {
+          if (
+            confirm(
+              "Warning: password contains leading/trailing spaces.\n" +
+                "Click 'Cancel' to leave as is, or 'OK' to remove these extra spaces."
+            )
+          )
+            password = trimmed;
+        }
+        if (password == "") {
+          if (!confirm("Warning: password is empty.")) return;
+        }
+        entropis.set(passphrase, domain, password);
+        passwords[domain] = password;
+        refresh(passwords);
+      }
+
+      function remove(domain) {
+        if (!entropis.remove(value("passphrase"), domain))
+          return error("Cannot remove entry (incorrect master password)");
+        refresh();
+      }
+
+      function copy(text) {
+        navigator.clipboard.writeText(text);
+      }
+
+      function lookup() {
+        var passwords = entropis.get(value("passphrase"));
+        if (passwords == null)
+          return error("Cannot search (incorrect master password)");
+        var pattern = value("search").trim().toLowerCase();
+        var found = {};
+        for (var domain in passwords) {
+          if (domain.toLowerCase().indexOf(pattern) != -1)
+            found[domain] = passwords[domain];
+        }
+        refresh(found);
+        var count = Object.keys(found).length;
+        var suffix = count == 1 ? "" : "es";
+        status(count + " match" + suffix + " found");
+      }
+
+      function drop() {
+        if (
+          !confirm(
+            "Warning: THIS ACTION WILL PERMANANTLY DELETE THE CURRENT PASSWORD DATABASE!!!\n"
+          )
+        )
+          return;
+        entropis.storage = null;
+        refresh();
+      }
+
+      function strict_password_entropy(password) {
+        var length = password.length;
+        if (length == 0) return 0;
+        var present = new Array(256);
+        for (var index = 0; index < password.length; ++index)
+          present[password.codePointAt(index)] = true;
+        var unique = 0;
+        for (var index = 0; index < 256; ++index) if (present[index]) ++unique;
+        return Math.floor((length * Math.log(unique)) / Math.log(2));
+      }
+
+      var criteria = 175;
+
+      function critique() {
+        var progress = element("progress");
+        var passphrase = value("passphrase");
+        if (passphrase == "") {
+          progress.style.display = "none";
+          return status("Please enter your master passphrase");
+        }
+        progress.style.display = "block";
+        var entropy = strict_password_entropy(passphrase);
+        var ratio = entropy / criteria;
+        if (ratio >= 1) ratio = 1;
+        element("bar").style.width = Math.floor(ratio * 100) + "%";
+        var ratings = ["weak", "poor", "fair", "good", "excellent"];
+        var index = Math.floor(ratio * ratings.length);
+        if (index == ratings.length) --index;
+        var score = ratings[index];
+        reset_html("bar", "&nbsp" + score);
+      }
+
+      function doImport() {
+        if (
+          !confirm(
+            "Warning: THIS ACTION WILL PERMANANTLY DELETE THE CURRENT PASSWORD DATABASE!!!\n"
+          )
+        )
+          return;
+        if (navigator.clipboard.readText)
+          entropis.storage = navigator.clipboard.readText();
+        else {
+          element("special").style.display = "block";
+        }
+        refresh();
+      }
+
+      function doExport() {
+        status(null);
+        if (!entropis.get(value("passphrase")))
+          return error("Cannot export (incorrect master password)");
+        if (!entropis.storage) return error("Nothing to export");
+        copy(entropis.storage);
+        status(entropis.storage);
+      }
+
+      function store() {
+        var input = element("import").value;
+        if (!input) return error("Nothing to import");
+        entropis.storage = input;
+        element("special").style.display = "none";
+      }
+    </script>
+  </head>
+  <body
+    style="
+      background-color: #ccfcd1;
+      color: #369;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+    "
+    onload="element('passphrase').addEventListener('keyup', critique), critique()"
+  >
+    <div align="left">
+      <a href="https://github.com/gardhr/entropis">GitHub</a>
+    </div>
+    <div align="center">(Note: This page can be saved and used offline.)</div>
+    <br />
+    <h2 align="center">Entropis Password Manager</h2>
+    <br />
+    <form onsubmit="refresh()" action="javascript:void(0)">
+      <table align="center" style="">
+        <tr>
+          <td>
+            Master Passphrase &nbsp;
+            <input
+              type="button"
+              id="visibility"
+              value="show"
+              onclick="toggle()"
+            />
+            <input type="button" value="drop" onclick="drop()" />
+            <input type="button" value="import 📋" onclick="doImport()" />
+            <input type="button" value="export 📋" onclick="doExport()" />
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <div hidden width="100%" id="special" align="center">
+              <textarea id="import" onfocus="this.select()"></textarea>
+              <input type="button" value="store" onclick="store()" />
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <input type="password" id="passphrase" onfocus="this.select()" />
+            <input type="submit" value="unlock" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div id="progress">
+              <div id="bar"></div>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </form>
+    <form onsubmit="lookup()" action="javascript:void(0)">
+      <table align="center" style="">
+        <tr>
+          <td>
+            <input type="text" id="search" onfocus="this.select()" />
+            <button>search</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+    <form onsubmit="update()" action="javascript:void(0)">
+      <table align="center" style="">
+        <tr>
+          <td>Domain</td>
+          <td>Password</td>
+        </tr>
+        <tr>
+          <td>
+            <input type="text" id="domain" onfocus="this.select()" />
+          </td>
+          <td>
+            <input type="password" id="password" onfocus="this.select()" />
+          </td>
+          <td><button>add/update</button></td>
+        </tr>
+      </table>
+    </form>
+    <p
+      id="status"
+      align="center"
+      style="color: #50366d; word-wrap: break-word"
+    ></p>
+    <form onsubmit="" action="javascript:void(0)">
+      <table id="listing" align="center" style=""></table>
+    </form>
+    <p id="errors" align="center" style="color: red"></p>
+  </body>
+</html>
