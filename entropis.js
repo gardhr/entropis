@@ -204,7 +204,7 @@ var entropis = (function () {
     var wiggle = needed + 64;
     var pad = "";
     var current = passphrase;
-    while (pad.length < wiggle) {
+    while (pad.length <= wiggle) {
       current = hash(current, seed, -1);
       pad += current;
     }
