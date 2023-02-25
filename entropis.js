@@ -184,8 +184,6 @@ var entropis = (function () {
   /*
  Encode data as base-64 string
 */
-  //TODO: Bounds checking
-
   function encode(passphrase, text) {
     if (text == null) text = "";
     var blob = "";
@@ -238,7 +236,6 @@ var entropis = (function () {
   /*
  Decode data from base-64 string
 */
-  //TODO: Bounds checking
   function decode(passphrase, base64) {
     base64 = base64.trim();
     var result = "";
