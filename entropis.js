@@ -160,18 +160,22 @@ var entropis = (function () {
   Sponge construction; extract hash from our buffer
 */
 
+      var next = 0;
       var eod = buffer.length;
-      var left = 0;
-      var right = eod - 1;
+      var ready = false;
+      var last = null;
       for (;;) {
-        var roff = (nybble(buffer, right) << 4) | nybble(buffer, right - 1);
-        var loff = (nybble(buffer, left) << 4) | nybble(buffer, left + 1);
-        if (right <= roff + 1 + 3) break;
-        right -= roff + 1;
-        left += loff + 1;
-        if (left >= eod - 3) break;
-        result += hexChars[nybble(buffer, left++) ^ nybble(buffer, right--)];
+        var low = nybble(buffer, next++);
+        var high = nybble(buffer, next++) << 4;
+        var off = low | high;
+        next += off + 1;
+        if (next >= eod + 4) break;
+        var current = nybble(buffer, next++);
+        if (ready) result += hexChars[last ^ current];
+        else last = current;
+        ready = !ready;
       }
+
       if (digits < 0) return result;
     } while (result.length < digits);
     return result.substr(0, digits);
