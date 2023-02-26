@@ -102,7 +102,7 @@ var entropis = (function () {
       BigInt(2) +
     BigInt(1);
 
-  var block_size = 1 << 16;
+  var block_size = beta.toString(16).length << 1;
 
   /*
  Separators, for immalleability purposes
@@ -144,38 +144,33 @@ var entropis = (function () {
 
     do {
       var buffer = "";
+      // Stretch the current state
+      var hexadecimal = value.toString(16);
+      var stretched = hexadecimal;
       do {
-        // Stretch the current state
-        var hexadecimal = value.toString(16);
-        var stretched = hexadecimal;
-        do {
-          stretched += record_separator + hexadecimal;
-        } while (stretched.length <= block_size);
-        // Pass value through finite-field mapping
-        value = (alpha * BigInt("0x" + stretched)) % beta;
-        buffer += value.toString(16);
-      } while (buffer.length <= block_size);
-
+        stretched += record_separator + hexadecimal;
+      } while (stretched.length <= block_size);
+      // Pass value through finite-field mapping
+      value = (alpha * BigInt("0x" + stretched)) % beta;
+      buffer += value.toString(16);
       /*
   Sponge construction; extract hash from our buffer
 */
-
       var next = 0;
-      var eod = buffer.length;
+      var eod = buffer.length - 4;
       var ready = false;
       var last = null;
       for (;;) {
-        var low = nybble(buffer, next++);
-        var high = nybble(buffer, next++) << 4;
-        var off = low | high;
+        var left = nybble(buffer, next++);
+        var right = nybble(buffer, next++) << 4;
+        var off = left | right;
         next += off + 1;
-        if (next >= eod + 4) break;
+        if (next >= eod) break;
         var current = nybble(buffer, next++);
         if (ready) result += hexChars[last ^ current];
         else last = current;
         ready = !ready;
       }
-
       if (digits < 0) return result;
     } while (result.length < digits);
     return result.substr(0, digits);
