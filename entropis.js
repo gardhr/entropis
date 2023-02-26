@@ -47,7 +47,6 @@ var entropis = (function () {
 
   var base64Chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-
   var base64CodeTo6Bits = new Array(256);
   var counter = 0;
   for (var index = char("A"), Z = char("Z"); index <= Z; ++index)
@@ -153,17 +152,16 @@ var entropis = (function () {
       // Pass value through finite-field mapping
       value = (alpha * BigInt("0x" + stretched)) % beta;
       buffer += value.toString(16);
+      
       /*
   Sponge construction; extract hash from our buffer
 */
       var next = 0;
-      var eod = buffer.length - 4;
+      var eod = buffer.length - 2;
       var ready = false;
       var last = null;
       for (;;) {
-        var left = nybble(buffer, next++);
-        var right = nybble(buffer, next++) << 4;
-        var off = left | right;
+        var off = nybble(buffer, next++);
         next += off + 1;
         if (next >= eod) break;
         var current = nybble(buffer, next++);
