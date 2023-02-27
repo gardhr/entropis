@@ -17,7 +17,7 @@ Reliable password storage has become a problematic issue in recent years. Passwo
 
 _WARNING_
 
-This project (v1.0.0) is currently in the "experimental" or "beta" stage. The validity of the algorithm has yet to be verified (the code is however fairly well documented and relatively easy to follow.) Use at your own risk! 
+This project (v1.0.0) is currently in the "experimental" or "beta" stage. The validity of the algorithm has yet to be verified (the code is however fairly well documented and relatively easy to follow.) Use at your own risk!
 
 ## API
 
