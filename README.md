@@ -17,11 +17,9 @@ Reliable password storage has become a problematic issue in recent years. Passwo
 
 _WARNING_
 
-The status of this project is currently "experimental" phase (v0.0.20). There seems to be a major issue with browser BigInt implementations (not) being able to handle the computations involved. Testing with node.js does however look pretty promising, and no doubt a C/C++ version will likely perform even better still.
+This project (v1.0.0) is currently in the "experimental" or "beta" stage. The validity of the algorithm has yet to be verified (the code is however fairly well documented and relatively easy to follow.) Use at your own risk! 
 
 ## API
-
-(WARNING: The API is not yet stable and thus subject to change without notice.)
 
 The current Javascript implementation supports the following operations:
 
