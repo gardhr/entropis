@@ -107,21 +107,15 @@ SOFTWARE.
         /*
  FIXME: These parameters aren't very browser-friendly
 */
-        // Certified safe primes (source: primes.utm.edu)
+        // Certified safe prime (source: primes.utm.edu)
 
         // #59419 [2021]
-        var alpha =
+        var modulus =
           (BigInt(4318624617) * BigInt(2) ** BigInt(152849) - BigInt(1)) *
             BigInt(2) +
           BigInt(1);
 
-        // #57461 [2006]
-        var beta =
-          (BigInt(137211941292195) * BigInt(2) ** BigInt(171960) - BigInt(1)) *
-            BigInt(2) +
-          BigInt(1);
-
-        var block_size = beta.toString(16).length << 1;
+        var block_size = modulus.toString(16).length << 1;
 
         /*
  Separators, for immalleability purposes
@@ -170,7 +164,7 @@ SOFTWARE.
               stretched += record_separator + hexadecimal;
             } while (stretched.length <= block_size);
             // Pass value through finite-field mapping
-            value = (alpha * BigInt("0x" + stretched)) % beta;
+            value = BigInt("0x" + stretched) % modulus;
             buffer += value.toString(16);
 
             /*
