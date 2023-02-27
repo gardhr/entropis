@@ -152,7 +152,7 @@ var entropis = (function () {
       // Pass value through finite-field mapping
       value = (alpha * BigInt("0x" + stretched)) % beta;
       buffer += value.toString(16);
-      
+
       /*
   Sponge construction; extract hash from our buffer
 */
