@@ -35,3 +35,5 @@ log("entropis.get(pass, domain):", entropis.get(pass, domain));
 var newpass = "!@ChurchillWa$NoNovice";
 log("entropis.change(pass, newpass):", entropis.change(pass, newpass));
 log("entropis.get(newpass, domain):", entropis.get(newpass, domain));
+
+for (var i = 0; i < 10000; ++i) entropis.hash(pass, salt, digits);
