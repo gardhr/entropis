@@ -391,7 +391,13 @@ SOFTWARE.
         reset_html("status", message || "");
       }
 
+      function showElement(that, yes) {
+        (element(that) || that).style.display =
+          yes !== false ? "block" : "none";
+      }
+
       function refresh(passwords) {
+        showElement("special", false);
         status(null);
         reset_html("errors");
         reset_input("domain");
@@ -502,7 +508,9 @@ SOFTWARE.
       }
 
       function copy(text) {
-        navigator.clipboard.writeText(text);
+        try {
+          navigator.clipboard.writeText(text);
+        } catch (ignore) {}
       }
 
       function lookup() {
@@ -549,10 +557,10 @@ SOFTWARE.
         var progress = element("progress");
         var passphrase = value("passphrase");
         if (passphrase == "") {
-          progress.style.display = "none";
+          showElement(progress, false);
           return status("Please enter your master passphrase");
         }
-        progress.style.display = "block";
+        showElement(progress);
         var entropy = strict_password_entropy(passphrase);
         var ratio = entropy / criteria;
         if (ratio >= 1) ratio = 1;
@@ -571,12 +579,12 @@ SOFTWARE.
           )
         )
           return;
+        refresh();
         if (navigator.clipboard.readText)
           entropis.storage = navigator.clipboard.readText();
         else {
-          element("special").style.display = "block";
+          showElement("special");
         }
-        refresh();
       }
 
       function doExport() {
@@ -592,7 +600,7 @@ SOFTWARE.
         var input = element("import").value;
         if (!input) return error("Nothing to import");
         entropis.storage = input;
-        element("special").style.display = "none";
+        refresh();
       }
     </script>
   </head>
@@ -633,8 +641,11 @@ SOFTWARE.
         <tr>
           <td>
             <div hidden width="100%" id="special" align="center">
-              <textarea id="import" onfocus="this.select()"></textarea>
-              <input type="button" value="store" onclick="store()" />
+              <textarea
+                id="import"
+                onfocus="this.value = '', this.select()"
+              ></textarea>
+              <input type="button" value="submit" onclick="store()" />
             </div>
           </td>
         </tr>
