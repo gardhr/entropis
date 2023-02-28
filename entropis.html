@@ -378,12 +378,12 @@ SOFTWARE.
 
       function critique() {
         var progress = element("progress");
-        var passphrase = value("passphrase");
+        var passphrase = value("newpass");
         if (passphrase == "") {
-          showElement(progress, false);
+          show_element(progress, false);
           return status("Please enter your master passphrase");
         }
-        showElement(progress);
+        show_element(progress);
         var entropy = strict_password_entropy(passphrase);
         var ratio = entropy / criteria;
         if (ratio >= 1) ratio = 1;
@@ -423,13 +423,13 @@ SOFTWARE.
         reset_html("status", message || "");
       }
 
-      function showElement(that, yes) {
+      function show_element(that, yes) {
         (element(that) || that).style.display =
           yes !== false ? "block" : "none";
       }
 
       function refresh(passwords) {
-        showElement("special", false);
+        show_element("import-toggle", false);
         status(null);
         reset_html("errors");
         reset_input("domain");
@@ -492,15 +492,18 @@ SOFTWARE.
 
       function toggle() {
         var passphrase = element("passphrase");
+        var newpassphrase = element("newpass");
         var password = element("password");
         var visibility = element("visibility");
         visible = !visible;
         if (visible) {
           passphrase.type = "text";
+          newpassphrase.type = "text";
           password.type = "text";
           visibility.value = "hide";
         } else {
           passphrase.type = "password";
+          newpassphrase.type = "password";
           password.type = "password";
           visibility.value = "show";
         }
@@ -572,7 +575,7 @@ SOFTWARE.
         refresh();
       }
 
-      function doImport() {
+      function initiate_import() {
         if (
           !confirm(
             "Warning: THIS ACTION WILL PERMANANTLY DELETE THE CURRENT PASSWORD DATABASE!!!\n"
@@ -583,11 +586,18 @@ SOFTWARE.
         if (navigator.clipboard.readText)
           entropis.storage = navigator.clipboard.readText();
         else {
-          showElement("special");
+          show_element("import-toggle");
         }
       }
 
-      function doExport() {
+      function do_import() {
+        var input = element("import").value;
+        if (!input) return error("Nothing to import");
+        entropis.storage = input;
+        refresh();
+      }
+
+      function do_export() {
         status(null);
         if (!entropis.get(value("passphrase")))
           return error("Cannot export (incorrect master password)");
@@ -596,10 +606,32 @@ SOFTWARE.
         status(entropis.storage);
       }
 
-      function store() {
-        var input = element("import").value;
-        if (!input) return error("Nothing to import");
-        entropis.storage = input;
+      function initiate_change() {
+        refresh();
+        show_element("change-toggle");
+      }
+
+      function change() {
+        var newpass = element("newpass").value;
+        var trimmed = newpass.trim();
+        if (newpass != trimmed) {
+          if (
+            confirm(
+              "Warning: password contains leading/trailing spaces.\n" +
+                "Click 'Cancel' to leave as is, or 'OK' to remove these extra spaces."
+            )
+          )
+            newpass = trimmed;
+        }
+        if (newpass == "") {
+          if (!confirm("Warning: password is empty.")) return;
+        }
+        if (!entropis.change(value("passphrase"), newpass))
+          return error("Cannot change password (incorrect master password)");
+        reset_input("passphrase", newpass);
+        reset_input("newpass");
+        show_element("change-toggle", false);
+        show_element(progress, false);
         refresh();
       }
     </script>
@@ -612,7 +644,7 @@ SOFTWARE.
       font-size: 20px;
       font-weight: bold;
     "
-    onload="element('passphrase').addEventListener('keyup', critique), critique()"
+    onload="element('newpass').addEventListener('keyup', critique), critique()"
   >
     <div align="left">
       <a href="https://github.com/gardhr/entropis">GitHub</a>
@@ -625,7 +657,6 @@ SOFTWARE.
       <table align="center" style="">
         <tr>
           <td>
-            Master Passphrase &nbsp;
             <input
               type="button"
               id="visibility"
@@ -633,27 +664,46 @@ SOFTWARE.
               onclick="toggle()"
             />
             <input type="button" value="drop" onclick="drop()" />
-            <input type="button" value="import 📋" onclick="doImport()" />
-            <input type="button" value="export 📋" onclick="doExport()" />
+            <input
+              type="button"
+              value="import 📋"
+              onclick="initiate_import()"
+            />
+            <input type="button" value="export 📋" onclick="do_export()" />
+            <input type="button" value="change" onclick="initiate_change()" />
           </td>
         </tr>
-
         <tr>
           <td>
-            <div hidden width="100%" id="special" align="center">
+            <div hidden width="100%" id="import-toggle" align="center">
               <textarea
                 id="import"
                 onfocus="this.value = '', this.select()"
               ></textarea>
-              <input type="button" value="submit" onclick="store()" />
+              <input type="button" value="submit" onclick="do_import()" />
             </div>
           </td>
         </tr>
-
         <tr>
           <td>
-            <input type="password" id="passphrase" onfocus="this.select()" />
+            Master Passphrase &nbsp;<input
+              type="password"
+              id="passphrase"
+              onfocus="this.select()"
+            />
             <input type="submit" value="unlock" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div hidden width="100%" id="change-toggle" align="center">
+              New Passphrase &nbsp;<input
+                type="password"
+                id="newpass"
+                onfocus="this.select()"
+              />
+              <input type="button" value="submit" onclick="change()" />
+            </div>
           </td>
         </tr>
         <tr>
