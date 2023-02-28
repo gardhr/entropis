@@ -363,6 +363,38 @@ SOFTWARE.
       entropis.storage = localStorage.getItem("entropis");
       var visible = false;
 
+      function strict_password_entropy(password) {
+        var length = password.length;
+        if (length == 0) return 0;
+        var present = new Array(256);
+        for (var index = 0; index < password.length; ++index)
+          present[password.codePointAt(index)] = true;
+        var unique = 0;
+        for (var index = 0; index < 256; ++index) if (present[index]) ++unique;
+        return Math.floor((length * Math.log(unique)) / Math.log(2));
+      }
+
+      var criteria = 175;
+
+      function critique() {
+        var progress = element("progress");
+        var passphrase = value("passphrase");
+        if (passphrase == "") {
+          showElement(progress, false);
+          return status("Please enter your master passphrase");
+        }
+        showElement(progress);
+        var entropy = strict_password_entropy(passphrase);
+        var ratio = entropy / criteria;
+        if (ratio >= 1) ratio = 1;
+        element("bar").style.width = Math.floor(ratio * 100) + "%";
+        var ratings = ["weak", "poor", "fair", "good", "excellent"];
+        var index = Math.floor(ratio * ratings.length);
+        if (index == ratings.length) --index;
+        var score = ratings[index];
+        reset_html("bar", "&nbsp" + score);
+      }
+
       function element(id) {
         return document.getElementById(id);
       }
@@ -540,38 +572,6 @@ SOFTWARE.
         refresh();
       }
 
-      function strict_password_entropy(password) {
-        var length = password.length;
-        if (length == 0) return 0;
-        var present = new Array(256);
-        for (var index = 0; index < password.length; ++index)
-          present[password.codePointAt(index)] = true;
-        var unique = 0;
-        for (var index = 0; index < 256; ++index) if (present[index]) ++unique;
-        return Math.floor((length * Math.log(unique)) / Math.log(2));
-      }
-
-      var criteria = 175;
-
-      function critique() {
-        var progress = element("progress");
-        var passphrase = value("passphrase");
-        if (passphrase == "") {
-          showElement(progress, false);
-          return status("Please enter your master passphrase");
-        }
-        showElement(progress);
-        var entropy = strict_password_entropy(passphrase);
-        var ratio = entropy / criteria;
-        if (ratio >= 1) ratio = 1;
-        element("bar").style.width = Math.floor(ratio * 100) + "%";
-        var ratings = ["weak", "poor", "fair", "good", "excellent"];
-        var index = Math.floor(ratio * ratings.length);
-        if (index == ratings.length) --index;
-        var score = ratings[index];
-        reset_html("bar", "&nbsp" + score);
-      }
-
       function doImport() {
         if (
           !confirm(
@@ -692,11 +692,7 @@ SOFTWARE.
         </tr>
       </table>
     </form>
-    <p
-      id="status"
-      align="center"
-      style="color: #50366d; word-wrap: break-word"
-    ></p>
+    <p id="status" align="center" style="color: #50366d"></p>
     <form onsubmit="" action="javascript:void(0)">
       <table id="listing" align="center" style=""></table>
     </form>
