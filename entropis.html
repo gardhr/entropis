@@ -558,6 +558,14 @@ Sanity check (trailing bits must match those of the OTP)
           b1.addEventListener(
             "click",
             curry(domain, (domain) => {
+              if (
+                !confirm(
+                  "Warning: THIS ACTION WILL PERMANANTLY DELETE `" +
+                    domain +
+                    "` FROM THE PASSWORD DATABASE!!!"
+                )
+              )
+                return;
               remove(domain);
             })
           );
