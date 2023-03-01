@@ -510,6 +510,7 @@ Sanity check (trailing bits must match those of the OTP)
           row.appendChild(td1);
           var bcd = create("button");
           bcd.innerText = "📋";
+          bcd.title = "Copy domain to clipboard";
           bcd.addEventListener("click", () => {
             copy(domain);
           });
@@ -525,6 +526,7 @@ Sanity check (trailing bits must match those of the OTP)
           row.appendChild(td2);
           var bcp = create("button");
           bcp.innerText = "📋";
+          bcp.title = "Copy password to clipboard";
           bcp.addEventListener("click", () => {
             copy(passwords[domain]);
           });
@@ -539,6 +541,7 @@ Sanity check (trailing bits must match those of the OTP)
           td2.appendChild(inp2);
           var b1 = create("button");
           b1.innerText = "delete";
+          b1.title = "Delete this entry from the datastore";
           b1.addEventListener("click", () => {
             remove(domain);
           });
@@ -718,15 +721,32 @@ Sanity check (trailing bits must match those of the OTP)
               id="visibility"
               value="show"
               onclick="toggle()"
+              title="Show/hide all password fields"
             />
-            <input type="button" value="drop" onclick="drop()" />
+            <input
+              type="button"
+              value="drop"
+              onclick="drop()"
+              title="Delete the current datastore"
+            />
             <input
               type="button"
               value="import 📋"
               onclick="initiate_import()"
+              title="Import base64-encoded datastore"
             />
-            <input type="button" value="export 📋" onclick="do_export()" />
-            <input type="button" value="change" onclick="initiate_change()" />
+            <input
+              type="button"
+              value="export 📋"
+              onclick="do_export()"
+              title="Export the current datastore"
+            />
+            <input
+              type="button"
+              value="change"
+              onclick="initiate_change()"
+              title="Change password"
+            />
           </td>
         </tr>
         <tr>
@@ -737,6 +757,11 @@ Sanity check (trailing bits must match those of the OTP)
                 onfocus="this.value = '', this.select()"
               ></textarea>
               <input type="button" value="submit" onclick="do_import()" />
+              <input
+                type="button"
+                value="cancel"
+                onclick="show_element('import-toggle', false)"
+              />
             </div>
           </td>
         </tr>
@@ -747,7 +772,11 @@ Sanity check (trailing bits must match those of the OTP)
               id="passphrase"
               onfocus="this.select()"
             />
-            <input type="submit" value="unlock" />
+            <input
+              type="submit"
+              value="unlock"
+              title="Unlock and load the current datastore"
+            />
           </td>
         </tr>
         <tr>
@@ -759,6 +788,11 @@ Sanity check (trailing bits must match those of the OTP)
                 onfocus="this.select()"
               />
               <input type="button" value="submit" onclick="change()" />
+              <input
+                type="button"
+                value="cancel"
+                onclick="show_element('change-toggle', false)"
+              />
             </div>
           </td>
         </tr>
@@ -776,7 +810,7 @@ Sanity check (trailing bits must match those of the OTP)
         <tr>
           <td>
             <input type="text" id="search" onfocus="this.select()" />
-            <button>search</button>
+            <button title="Find a domain in the datastore">search</button>
           </td>
         </tr>
       </table>
@@ -794,7 +828,11 @@ Sanity check (trailing bits must match those of the OTP)
           <td>
             <input type="password" id="password" onfocus="this.select()" />
           </td>
-          <td><button>add/update</button></td>
+          <td>
+            <button title="Update domain/password pair in the datastore">
+              add/update
+            </button>
+          </td>
         </tr>
       </table>
     </form>
