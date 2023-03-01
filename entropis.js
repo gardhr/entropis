@@ -30,6 +30,7 @@ var entropis = (function () {
   /*
  Static lookup tables
 */
+
   var hexChars = "0123456789abcdef";
   var byteToHex = new Array(256);
   for (var index = 0; index < 256; ++index)
@@ -86,7 +87,7 @@ var entropis = (function () {
   }
 
   /*
- FIXME: Ideally these should be a "certified" safe primes.
+ FIXME: Ideally these should be a "certified" safe primes
  
  openssl prime -hex -safe -generate -bits 8192 
 */
@@ -175,20 +176,35 @@ var entropis = (function () {
   /*
  Encode data as base-64 string
 */
+
   function encode(passphrase, text) {
     if (text == null) text = "";
     var blob = "";
     var hex = "";
     var buffer = "";
+
+    /*
+  Generate a 512-bit hash seed from the passphrase and a pseudorandom `salt` (This hash is "public" and will be needed to decode the result)
+*/
+
     for (var i = 0; i < 16; ++i)
       buffer += toHex(Math.floor(Math.random() * 0xffffffff));
     var seed = hash(passphrase, [buffer, new Date().getTime().toString()], 128);
     hex += seed;
+
+    /*
+ Embed the length of the input text in hexadecimal
+*/
     var size = text.length;
     var shex = toHex(size);
     blob += byteToHex[shex.length][1];
     blob += shex;
     blob += asHex(text);
+
+    /*
+Generate a one-time-pad (OTP) using our "public" seed
+*/
+
     var needed = blob.length;
     var wiggle = needed + 64;
     var pad = "";
@@ -197,6 +213,11 @@ var entropis = (function () {
       current = hash(current, seed, -1);
       pad += current;
     }
+
+    /*
+Encode the text
+*/
+
     var next;
     for (next = 0; next < needed; ++next) {
       var lhs = nybble(blob, next);
@@ -204,8 +225,18 @@ var entropis = (function () {
       var xored = lhs ^ rhs;
       hex += hexChars[xored];
     }
+
+    /*
+Append remaining padding to encoded data
+*/
+
     var limit = pad.length - Math.floor((128 + pad.length) % 6);
     while (next < limit) hex += pad.charAt(next++);
+
+    /*
+Convert the result from hexadecimal to base-64
+*/
+
     var length = hex.length;
     var base64 = "";
     for (var index = 0; index < length; index += 6) {
@@ -227,7 +258,12 @@ var entropis = (function () {
   /*
  Decode data from base-64 string
 */
+
   function decode(passphrase, base64) {
+    /*
+Convert the base-64 encoded data to hexadecimal
+*/
+
     base64 = base64.trim();
     var result = "";
     var temp = "";
@@ -252,6 +288,11 @@ var entropis = (function () {
     for (var length = temp.length, index = length - 1; index > 0; index--) {
       hex += temp[index];
     }
+
+    /*
+Extract our "public" seed header and reconstruct the original OTP
+*/
+
     var seed = hex.substr(0, 128);
     var encoded = hex.substr(128, hex.length);
     var elen = encoded.length;
@@ -261,18 +302,33 @@ var entropis = (function () {
       current = hash(current, seed, -1);
       pad += current;
     }
+
+    /*
+Extract embedded text length info
+*/
+
     var slen = 0;
     var hlen = nybble(encoded, 0) ^ nybble(pad, 0);
     for (index = 1; index <= hlen; ++index) {
       slen <<= 4;
       slen += nybble(encoded, index) ^ nybble(pad, index);
     }
+
+    /*
+Decode text
+*/
+
     for (var count = 0; count < slen; ++count, index += 2) {
       var xored = (nybble(encoded, index) ^ nybble(pad, index)) << 4;
       xored |= nybble(encoded, index + 1) ^ nybble(pad, index + 1);
       if (xored == 0) return null;
       result += String.fromCodePoint(xored);
     }
+
+    /*
+Sanity check (trailing bits must match those of the OTP)
+*/
+
     do {
       if ((nybble(encoded, index) ^ nybble(pad, index)) != 0) return null;
     } while (++index < elen);
