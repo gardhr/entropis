@@ -484,6 +484,12 @@ Sanity check (trailing bits must match those of the OTP)
           yes !== false ? "block" : "none";
       }
 
+      function curry(data, action) {
+        return function () {
+          return action(data);
+        };
+      }
+
       function refresh(passwords) {
         show_element("import-toggle", false);
         status(null);
@@ -511,9 +517,12 @@ Sanity check (trailing bits must match those of the OTP)
           var bcd = create("button");
           bcd.innerText = "📋";
           bcd.title = "Copy domain to clipboard";
-          bcd.addEventListener("click", () => {
-            copy(domain);
-          });
+          bcd.addEventListener(
+            "click",
+            curry(domain, (domain) => {
+              copy(domain);
+            })
+          );
           td1.appendChild(bcd);
           var inp1 = create("input");
           var color = "#D3D3D3";
@@ -527,24 +536,31 @@ Sanity check (trailing bits must match those of the OTP)
           var bcp = create("button");
           bcp.innerText = "📋";
           bcp.title = "Copy password to clipboard";
-          bcp.addEventListener("click", () => {
-            copy(passwords[domain]);
-          });
+          var password = passwords[domain];
+          bcp.addEventListener(
+            "click",
+            curry(password, (password) => {
+              copy(password);
+            })
+          );
           td2.appendChild(bcp);
           var inp2 = create("input");
           if (visible) inp2.type = "text";
           else inp2.type = "password";
           inp2.readOnly = true;
-          inp2.value = passwords[domain];
+          inp2.value = password;
           inp2.style.backgroundColor = color;
           inp2.onFocus = "this.select()";
           td2.appendChild(inp2);
           var b1 = create("button");
           b1.innerText = "delete";
           b1.title = "Delete this entry from the datastore";
-          b1.addEventListener("click", () => {
-            remove(domain);
-          });
+          b1.addEventListener(
+            "click",
+            curry(domain, (domain) => {
+              remove(domain);
+            })
+          );
           td2.appendChild(b1);
         }
       }
