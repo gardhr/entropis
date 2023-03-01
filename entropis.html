@@ -520,7 +520,7 @@ Sanity check (trailing bits must match those of the OTP)
           bcd.addEventListener(
             "click",
             curry(domain, (domain) => {
-              clipboard(domain);
+              copy(domain);
             })
           );
           td1.appendChild(bcd);
@@ -540,7 +540,7 @@ Sanity check (trailing bits must match those of the OTP)
           bcp.addEventListener(
             "click",
             curry(password, (password) => {
-              clipboard(password);
+              copy(password);
             })
           );
           td2.appendChild(bcp);
@@ -617,7 +617,7 @@ Sanity check (trailing bits must match those of the OTP)
         refresh();
       }
 
-      function clipboard(text) {
+      function copy(text) {
         try {
           navigator.clipboard.writeText(text);
         } catch (ignore) {}
@@ -673,12 +673,12 @@ Sanity check (trailing bits must match those of the OTP)
       }
 
       function do_export() {
+        status(null);
         if (!entropis.get(value("passphrase")))
           return error("Cannot export (incorrect master password)");
         if (!entropis.storage) return error("Nothing to export");
-        clipboard(entropis.storage);
-        reset_input("export", entropis.storage);
-        show_element("export-toggle");
+        copy(entropis.storage);
+        status(entropis.storage);
       }
 
       function initiate_change() {
@@ -781,21 +781,6 @@ Sanity check (trailing bits must match those of the OTP)
             </div>
           </td>
         </tr>
-        <tr>
-          <td>
-            <div hidden width="100%" id="export-toggle" align="center">
-              <textarea
-                id="export"
-                onfocus="this.select()"
-              ></textarea>
-              <input
-                type="button"
-                value="dismiss"
-                onclick="show_element('export-toggle', false)"
-              />
-            </div>
-          </td>
-        </tr>        
         <tr>
           <td>
             Master Passphrase &nbsp;<input
