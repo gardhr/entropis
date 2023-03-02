@@ -501,8 +501,6 @@ Sanity check (trailing bits must match those of the OTP)
         } catch (exception) {
           return error("Browser local storage is full and/or unavailable");
         }
-        //        if (!entropis.storage || entropis.storage == "null")
-        //          return status("Please specify a master passphrase before proceeding");
         var listing = element("listing");
         if (passwords == null) {
           var passphrase = value("passphrase");
@@ -524,7 +522,7 @@ Sanity check (trailing bits must match those of the OTP)
           bcd.addEventListener(
             "click",
             curry(domain, (domain) => {
-              clipboard(domain);
+              copy(domain);
             })
           );
           td1.appendChild(bcd);
@@ -547,7 +545,7 @@ Sanity check (trailing bits must match those of the OTP)
           bcp.addEventListener(
             "click",
             curry(password, (password) => {
-              clipboard(password);
+              copy(password);
             })
           );
           td2.appendChild(bcp);
@@ -635,9 +633,10 @@ Sanity check (trailing bits must match those of the OTP)
         refresh();
       }
 
-      function clipboard(text) {
+      function copy(text) {
         try {
           navigator.clipboard.writeText(text);
+          status("Data copied to clipboard");
         } catch (ignore) {}
       }
 
@@ -680,6 +679,7 @@ Sanity check (trailing bits must match those of the OTP)
           var input = navigator.clipboard.readText();
           if (!input) return error("Clipboard is empty/inaccessible");
           entropis.storage = input;
+          status("Password database copied from clipboard");
         } catch (ignore) {}
         show_element("import-toggle");
       }
@@ -696,7 +696,7 @@ Sanity check (trailing bits must match those of the OTP)
         if (!entropis.get(value("passphrase")))
           return error("Cannot export (incorrect master password)");
         if (!entropis.storage) return error("Nothing to export");
-        clipboard(entropis.storage);
+        copy(entropis.storage);
         reset_input("export", entropis.storage);
         show_element("export-toggle");
       }
