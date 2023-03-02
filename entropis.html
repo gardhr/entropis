@@ -529,7 +529,9 @@ Sanity check (trailing bits must match those of the OTP)
           inp1.readOnly = true;
           inp1.value = domain;
           inp1.style.backgroundColor = color;
-          inp1.onFocus = "this.select()";
+          inp1.onfocus = curry(inp1, (that) => {
+            that.select();
+          });
           td1.appendChild(inp1);
           var td2 = create("td");
           row.appendChild(td2);
@@ -550,7 +552,9 @@ Sanity check (trailing bits must match those of the OTP)
           inp2.readOnly = true;
           inp2.value = password;
           inp2.style.backgroundColor = color;
-          inp2.onFocus = "this.select()";
+          inp2.onfocus = curry(inp2, (that) => {
+            that.select();
+          });
           td2.appendChild(inp2);
           var b1 = create("button");
           b1.innerText = "delete";
