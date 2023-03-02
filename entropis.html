@@ -492,6 +492,7 @@ Sanity check (trailing bits must match those of the OTP)
 
       function refresh(passwords) {
         show_element("import-toggle", false);
+        show_element("export-toggle", false);
         status(null);
         reset_html("errors");
         reset_input("domain");
@@ -663,28 +664,28 @@ Sanity check (trailing bits must match those of the OTP)
       }
 
       function initiate_import() {
-        if (
-          !confirm(
-            "Warning: THIS ACTION WILL PERMANANTLY DELETE THE CURRENT PASSWORD DATABASE!!!\n"
-          )
-        )
-          return;
         refresh();
-        if (navigator.clipboard.readText)
+        try {
           entropis.storage = navigator.clipboard.readText();
-        else {
-          show_element("import-toggle");
-        }
+        } catch (ignore) {}
+        show_element("import-toggle");
       }
 
       function do_import() {
         var input = element("import").value;
         if (!input) return error("Nothing to import");
+        if (
+          !confirm(
+            "Warning: THIS ACTION WILL PERMANANTLY REPLACE THE CURRENT PASSWORD DATABASE!!!\n"
+          )
+        )
+          return;
         entropis.storage = input;
         refresh();
       }
 
       function do_export() {
+        refresh();
         if (!entropis.get(value("passphrase")))
           return error("Cannot export (incorrect master password)");
         if (!entropis.storage) return error("Nothing to export");
