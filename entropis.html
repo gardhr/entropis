@@ -665,8 +665,16 @@ Sanity check (trailing bits must match those of the OTP)
 
       function initiate_import() {
         refresh();
+        if (
+          !confirm(
+            "Warning: THIS ACTION WILL PERMANANTLY REPLACE THE CURRENT PASSWORD DATABASE!!!\n"
+          )
+        )
+          return;
         try {
-          entropis.storage = navigator.clipboard.readText();
+          var input = navigator.clipboard.readText();
+          if (!input) return error("Clipboard is empty/inaccessible");
+          entropis.storage = input;
         } catch (ignore) {}
         show_element("import-toggle");
       }
@@ -674,12 +682,6 @@ Sanity check (trailing bits must match those of the OTP)
       function do_import() {
         var input = element("import").value;
         if (!input) return error("Nothing to import");
-        if (
-          !confirm(
-            "Warning: THIS ACTION WILL PERMANANTLY REPLACE THE CURRENT PASSWORD DATABASE!!!\n"
-          )
-        )
-          return;
         entropis.storage = input;
         refresh();
       }
