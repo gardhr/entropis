@@ -532,6 +532,7 @@ Sanity check (trailing bits must match those of the OTP)
           inp1.style.backgroundColor = color;
           inp1.onfocus = curry(inp1, (that) => {
             that.select();
+            reset_input("domain", that.value);
           });
           td1.appendChild(inp1);
           var td2 = create("td");
@@ -555,6 +556,7 @@ Sanity check (trailing bits must match those of the OTP)
           inp2.style.backgroundColor = color;
           inp2.onfocus = curry(inp2, (that) => {
             that.select();
+            reset_input("password", that.value);
           });
           td2.appendChild(inp2);
           var b1 = create("button");
