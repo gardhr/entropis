@@ -501,8 +501,8 @@ Sanity check (trailing bits must match those of the OTP)
         } catch (exception) {
           return error("Browser local storage is full and/or unavailable");
         }
-        if (!entropis.storage || entropis.storage == "null")
-          return status("Please specify a master passphrase before proceeding");
+        //        if (!entropis.storage || entropis.storage == "null")
+        //          return status("Please specify a master passphrase before proceeding");
         var listing = element("listing");
         if (passwords == null) {
           var passphrase = value("passphrase");
