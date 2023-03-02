@@ -434,13 +434,10 @@ Sanity check (trailing bits must match those of the OTP)
 
       function critique() {
         var progress = element("progress");
-        var passphrase = value("newpass");
-        if (passphrase == "") {
-          show_element(progress, false);
-          return status("Please enter your master passphrase");
-        }
+        var newpass = value("newpass");
+        if (newpass == "") return show_element(progress, false);
         show_element(progress);
-        var entropy = strict_password_entropy(passphrase);
+        var entropy = strict_password_entropy(newpass);
         var ratio = entropy / criteria;
         if (ratio >= 1) ratio = 1;
         element("bar").style.width = Math.floor(ratio * 100) + "%";
@@ -491,9 +488,10 @@ Sanity check (trailing bits must match those of the OTP)
       }
 
       function refresh(passwords) {
+        status(null);
         show_element("import-toggle", false);
         show_element("export-toggle", false);
-        status(null);
+        show_element("progress", false);
         reset_html("errors");
         reset_input("domain");
         reset_input("password");
@@ -503,9 +501,14 @@ Sanity check (trailing bits must match those of the OTP)
         } catch (exception) {
           return error("Browser local storage is full and/or unavailable");
         }
+        if (!entropis.storage || entropis.storage == "null")
+          return status("Please specify a master passphrase before proceeding");
         var listing = element("listing");
         if (passwords == null) {
-          passwords = entropis.get(value("passphrase"));
+          var passphrase = value("passphrase");
+          if (passphrase == "")
+            return status("Please enter your master passphrase");
+          passwords = entropis.get(passphrase);
           if (passwords == null) return error("Incorrect master password");
         }
         if (Object.keys(passwords).length == 0)
@@ -722,8 +725,6 @@ Sanity check (trailing bits must match those of the OTP)
           return error("Cannot change password (incorrect master password)");
         reset_input("passphrase", newpass);
         reset_input("newpass");
-        show_element("change-toggle", false);
-        show_element(progress, false);
         refresh();
       }
     </script>
@@ -736,7 +737,7 @@ Sanity check (trailing bits must match those of the OTP)
       font-size: 20px;
       font-weight: bold;
     "
-    onload="element('newpass').addEventListener('keyup', critique), critique()"
+    onload="element('newpass').addEventListener('keyup', critique), refresh()"
   >
     <div align="left">
       <a href="https://github.com/gardhr/entropis">GitHub</a>

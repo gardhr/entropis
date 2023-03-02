@@ -22,7 +22,7 @@ This project is currently in the "experimental" or "beta" stage. The validity of
 
 ## Algorithm
 
-[Overview](https://github.com/gardhr/entropis/blob/main/ALGORITHM.md) of the hash algorithm. 
+[Overview](https://github.com/gardhr/entropis/blob/main/ALGORITHM.md) of the hash algorithm.
 
 ## API
 
