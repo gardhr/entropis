@@ -491,6 +491,7 @@ Sanity check (trailing bits must match those of the OTP)
         status(null);
         show_element("import-toggle", false);
         show_element("export-toggle", false);
+        show_element("change-toggle", false);
         show_element("progress", false);
         reset_html("errors");
         reset_input("domain");
@@ -829,7 +830,7 @@ Sanity check (trailing bits must match those of the OTP)
         </tr>
         <tr>
           <td>
-            <div hidden width="100%" id="change-toggle" align="center">
+            <div hidden width="100%" id="change-toggle">
               New Passphrase &nbsp;<input
                 type="password"
                 id="newpass"
@@ -841,15 +842,14 @@ Sanity check (trailing bits must match those of the OTP)
                 value="cancel"
                 onclick="show_element('change-toggle', false)"
               />
+              <div id="progress">
+                <div id="bar"></div>
+              </div>
             </div>
           </td>
         </tr>
         <tr>
-          <td>
-            <div id="progress">
-              <div id="bar"></div>
-            </div>
-          </td>
+          <td></td>
         </tr>
       </table>
     </form>
