@@ -523,6 +523,7 @@ Sanity check (trailing bits must match those of the OTP)
             "click",
             curry(domain, (domain) => {
               copy(domain);
+              reset_input("domain", domain);
             })
           );
           td1.appendChild(bcd);
@@ -546,6 +547,7 @@ Sanity check (trailing bits must match those of the OTP)
             "click",
             curry(password, (password) => {
               copy(password);
+              reset_input("password", password);
             })
           );
           td2.appendChild(bcp);
