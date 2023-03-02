@@ -1,13 +1,14 @@
 # entropis
 
-Note: a crude web interface can be found [here](https://gardhr.github.io/entropis/).
+Note: a basic web interface can be found [here](https://gardhr.github.io/entropis/) (also listed in this repo as the file "entropis.html").
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/gardhr/entropis/master/LICENSE.MIT)
 
-- [Motivation](#motivation)
-- [Status](#status)
-- [API](#api)
-- [License](#license)
+- [Motivation](#Motivation)
+- [Status](#Status)
+- [Algorithm](#Algorithm)
+- [API](#Api)
+- [License](#License)
 
 ## Motivation
 
@@ -18,6 +19,10 @@ Reliable password storage has become a problematic issue in recent years. Passwo
 **_WARNING_**
 
 This project is currently in the "experimental" or "beta" stage. The validity of the algorithm has yet to be verified (the code is however fairly well documented and relatively easy to follow). Use at your own risk!
+
+## Algorithm
+
+[Overview](https://github.com/gardhr/entropis/blob/main/ALGORITHM.MD) of the hash algorithm. 
 
 ## API
 
