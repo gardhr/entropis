@@ -435,24 +435,6 @@ Sanity check (trailing bits must match those of the OTP)
         return Math.floor((length * Math.log(unique)) / Math.log(2));
       }
 
-      var criteria = 175;
-
-      function critique() {
-        var progress = element("critique-toggle");
-        var newpass = value("newpass");
-        if (newpass == "") return show_element(progress, false);
-        show_element(progress);
-        var entropy = strict_password_entropy(newpass);
-        var ratio = entropy / criteria;
-        if (ratio >= 1) ratio = 1;
-        element("critique-gauge").style.width = Math.floor(ratio * 100) + "%";
-        var ratings = ["weak", "poor", "fair", "good", "excellent"];
-        var index = Math.floor(ratio * ratings.length);
-        if (index == ratings.length) --index;
-        var score = ratings[index];
-        reset_html("critique-gauge", "&nbsp" + score);
-      }
-
       function element(id) {
         return document.getElementById(id);
       }
@@ -732,6 +714,24 @@ Sanity check (trailing bits must match those of the OTP)
         reset_input("passphrase", newpass);
         reset_input("newpass");
         refresh();
+      }
+
+      var criteria = 175;
+
+      function critique() {
+        var progress = element("critique-toggle");
+        var newpass = value("newpass");
+        if (newpass == "") return show_element(progress, false);
+        show_element(progress);
+        var entropy = strict_password_entropy(newpass);
+        var ratio = entropy / criteria;
+        if (ratio >= 1) ratio = 1;
+        element("critique-gauge").style.width = Math.floor(ratio * 100) + "%";
+        var ratings = ["weak", "poor", "fair", "good", "excellent"];
+        var index = Math.floor(ratio * ratings.length);
+        if (index == ratings.length) --index;
+        var score = ratings[index];
+        reset_html("critique-gauge", "&nbsp" + score);
       }
 
       function initialize() {
