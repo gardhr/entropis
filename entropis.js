@@ -114,7 +114,6 @@ var entropis = (function () {
 */
 
   function hash(passphrase, salt, digits) {
-  
     /*
  Configure hash function parameters
 */
