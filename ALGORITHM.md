@@ -17,7 +17,7 @@ The current value is converted to a hexadecimal string, then repeatedly concaten
 
 ## Map
 
-The current value is passed through a simple finite-field mapping. Specifically, this entails setting the value to the modulo of itself multiplied with a large prime. This step is completely reversible, and as such the only purpose is to create an "avalanche effect" on the output.
+The current value is passed through a simple finite-field mapping. Specifically, this entails setting the value to itself multiplied with a large prime modulo another prime. This step is completely reversible, and as such the only purpose is to create an "avalanche effect" on the output.
 
 ## Extract
 
