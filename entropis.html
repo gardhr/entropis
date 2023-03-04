@@ -362,16 +362,19 @@ Sanity check (trailing bits must match those of the OTP)
           return result;
         }
 
-        function get(passphrase, domain) {
-          if (entropis.storage == null) return {};
-          var data = decode(passphrase, entropis.storage);
-          if (data == null) return null;
-          var datastore;
+        function object(passphrase, base64) {
+          if (base64 == null) return {};
+          var data = decode(passphrase, base64);
           try {
-            datastore = JSON.parse(data);
+            return JSON.parse(data);
           } catch (exception) {
             return null;
           }
+        }
+
+        function get(passphrase, domain) {
+          var datastore = object(passphrase, entropis.storage);
+          if (datastore == null) return null;
           return domain == null ? datastore : datastore[domain];
         }
 
@@ -405,6 +408,17 @@ Sanity check (trailing bits must match those of the OTP)
             JSON.stringify(datastore)
           ));
         }
+
+        /*
+ //TODO:
+  function merge(passphrase, base64, oldphrase) {
+    if (oldphrase == null) oldphrase = passphrase;
+    var datastore = get(passphrase);
+var other = object(oldphrase, base64)
+if (datastore == null||other == null) return null;
+    // return (entropis.storage = encode(newphrase, JSON.stringify(datastore)));
+  }
+*/
 
         return { hash, encode, decode, get, set, remove, clear, change };
       })();
