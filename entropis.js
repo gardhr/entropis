@@ -335,7 +335,7 @@ Sanity check (trailing bits must match those of the OTP)
     return result;
   }
 
-  function object(passphrase, base64) {
+  function extract(passphrase, base64) {
     if (base64 == null) return {};
     var data = decode(passphrase, base64);
     try {
@@ -346,18 +346,22 @@ Sanity check (trailing bits must match those of the OTP)
   }
 
   function get(passphrase, domain) {
-    var datastore = object(passphrase, entropis.storage);
-    if (datastore == null) return null;
-    return domain == null ? datastore : datastore[domain];
+    var extracted = extract(passphrase, entropis.storage);
+    if (extracted == null) return null;
+    return domain == null ? extracted : extracted[domain];
+  }
+
+  function update(passphrase, extracted) {
+    return (entropis.storage = encode(passphrase, JSON.stringify(extracted)));
   }
 
   function set(passphrase, domain, password) {
-    var datastore = get(passphrase);
-    if (datastore == null) return null;
+    var extracted = get(passphrase);
+    if (extracted == null) return null;
     if (password === undefined) return null;
-    if (password == null) delete datastore[domain];
-    else datastore[domain] = password;
-    return (entropis.storage = encode(passphrase, JSON.stringify(datastore)));
+    if (password == null) delete extracted[domain];
+    else extracted[domain] = password;
+    return update(passphrase, extracted);
   }
 
   function remove(passphrase, domain) {
@@ -371,23 +375,27 @@ Sanity check (trailing bits must match those of the OTP)
   }
 
   function change(oldphrase, newphrase) {
-    var datastore = get(oldphrase);
-    if (datastore == null) return null;
-    return (entropis.storage = encode(newphrase, JSON.stringify(datastore)));
+    var extracted = get(oldphrase);
+    if (extracted == null) return null;
+    return update(newphrase, extracted);
   }
 
-  /*
- //TODO:
-  function merge(passphrase, base64, oldphrase) {
+  function merge(passphrase, base64, oldphrase, force) {
     if (oldphrase == null) oldphrase = passphrase;
-    var datastore = get(passphrase);
-var other = object(oldphrase, base64)
-if (datastore == null||other == null) return null;
-    // return (entropis.storage = encode(newphrase, JSON.stringify(datastore)));
+    var extracted = get(passphrase);
+    var other = extract(oldphrase, base64);
+    if (extracted == null) return null;
+    if (other == null) return entropis.storage;
+    var updated = {};
+    for (domain in other) {
+      if (!force && extracted.hasOwnProperty(domain)) return null;
+      updated[domain] = other[domain];
+    }
+    extracted = updated;
+    return update(passphrase, extracted);
   }
-*/
 
-  return { hash, encode, decode, get, set, remove, clear, change };
+  return { hash, encode, decode, get, set, remove, clear, change, merge };
 })();
 
 if (typeof module !== "undefined") module.exports = entropis;
