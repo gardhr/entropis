@@ -63,7 +63,7 @@ Deletes the internal datastore protected by a master passphrase. If passphrase i
 
 Re-encodes the internal datastore protected by master passphrase `oldphrase` with the new passphrase `newphrase`. Returns the updated base-64 representation of the datastore.
 
-`merge(passphrase, base64, oldphrase, force)`
+`entropis.merge(passphrase, base64, oldphrase, force)`
 
 Merges the datastore `base64` the internal datastore protected by a master passphrase. If `oldphrase` is null or empty, `passphrase` is used to decode `base64`. If `force` is falsy, the function will fail in the event of a merge conflict. Returns the updated base-64 representation of the datastore.
 

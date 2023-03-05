@@ -349,7 +349,7 @@ Sanity check (trailing bits must match those of the OTP)
   function get(passphrase, domain) {
     var extracted = extract(passphrase, entropis.storage);
     if (extracted == null) return null;
-    return domain == null ? extracted : extracted[domain];
+    return domain == null ? extracted : extracted[domain.trim().toLowerCase()];
   }
 
   function update(passphrase, extracted) {
@@ -357,6 +357,7 @@ Sanity check (trailing bits must match those of the OTP)
   }
 
   function set(passphrase, domain, password) {
+    domain = domain.trim().toLowerCase();
     var extracted = get(passphrase);
     if (extracted == null || password === undefined) return null;
     if (password == null) delete extracted[domain];

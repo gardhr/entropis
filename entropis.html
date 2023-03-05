@@ -377,7 +377,9 @@ Sanity check (trailing bits must match those of the OTP)
         function get(passphrase, domain) {
           var extracted = extract(passphrase, entropis.storage);
           if (extracted == null) return null;
-          return domain == null ? extracted : extracted[domain];
+          return domain == null
+            ? extracted
+            : extracted[domain.trim().toLowerCase()];
         }
 
         function update(passphrase, extracted) {
@@ -388,6 +390,7 @@ Sanity check (trailing bits must match those of the OTP)
         }
 
         function set(passphrase, domain, password) {
+          domain = domain.trim().toLowerCase();
           var extracted = get(passphrase);
           if (extracted == null || password === undefined) return null;
           if (password == null) delete extracted[domain];
@@ -640,7 +643,7 @@ Sanity check (trailing bits must match those of the OTP)
         var passwords = entropis.get(passphrase);
         if (passwords == null)
           return error("Cannot update (incorrect master password)");
-        var domain = value("domain").trim();
+        var domain = value("domain").trim().toLowerCase();
         if (domain === "") return error("Domain cannot be empty");
         var password = value("password");
         var trimmed = password.trim();
@@ -681,8 +684,7 @@ Sanity check (trailing bits must match those of the OTP)
         var pattern = value("search").trim().toLowerCase();
         var found = {};
         for (var domain in passwords) {
-          if (domain.toLowerCase().indexOf(pattern) != -1)
-            found[domain] = passwords[domain];
+          if (domain.indexOf(pattern) != -1) found[domain] = passwords[domain];
         }
         refresh(found);
         var count = Object.keys(found).length;
