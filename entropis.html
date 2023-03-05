@@ -813,8 +813,8 @@ Sanity check (trailing bits must match those of the OTP)
 
       function initialize() {
         entropis.storage = localStorage.getItem("entropis");
-        element("newpass").addEventListener("keyup", critique);
-        element("export").addEventListener("keyup", function (keyboard) {
+        element("newpass").addEventListener("keydown", critique);
+        element("export").addEventListener("keydown", function (keyboard) {
           if (keyboard.code == "Enter") hide_element("export-toggle");
         });
         element("force-merge").checked = false;
@@ -841,7 +841,7 @@ Sanity check (trailing bits must match those of the OTP)
     <br />
     <br /><br />
     <form onsubmit="refresh()" action="javascript:void(0)">
-      <table align="center" style="word-wrap: break-word">
+      <table align="center">
         <tr>
           <td>
             <input
@@ -950,7 +950,7 @@ Sanity check (trailing bits must match those of the OTP)
           </tr>
           <tr>
             <td>
-              <div id="critique-toggle">
+              <div width="100%" id="critique-toggle">
                 <div id="critique-gauge"></div>
               </div>
             </td>
@@ -1024,9 +1024,7 @@ Sanity check (trailing bits must match those of the OTP)
       </form>
     </div>
     <p id="status" align="center" style="color: #50366d"></p>
-    <form onsubmit="" action="javascript:void(0)">
-      <table id="listing" align="center" style=""></table>
-    </form>
+    <table id="listing" align="center" style=""></table>
     <p id="errors" align="center" style="color: #d60000"></p>
   </body>
 </html>
