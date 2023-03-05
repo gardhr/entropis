@@ -45,7 +45,7 @@ Converts a base-64 encoded datastore to text with passphrase. (Note: Does NOT mo
 
 `entropis.set(passphrase, domain, password)`
 
-Securely stores the password for a given domain within the internal datastore using a master passphrase. Returns the updated base64 representation of the datastore.
+Securely stores the password for a given domain within the internal datastore using a master passphrase. Returns the updated base-64 representation of the datastore.
 
 `entropis.get(passphrase, domain)`
 
@@ -53,7 +53,7 @@ Securely retrieves the password for a given domain from the internal datastore u
 
 `entropis.remove(passphrase, domain)`
 
-Securely deletes the entry for a given domain within the internal datastore using a master passphrase. Returns the updated base64 representation of the datastore.
+Securely deletes the entry for a given domain within the internal datastore using a master passphrase. Returns the updated base-64 representation of the datastore.
 
 `entropis.clear(passphrase)`
 
@@ -61,11 +61,11 @@ Deletes the internal datastore protected by a master passphrase. If passphrase i
 
 `entropis.change(oldphrase, newphrase)`
 
-Re-encodes the internal datastore protected by master passphrase `oldphrase` with the new passphrase `newphrase`. Returns the updated base64 representation of the datastore.
+Re-encodes the internal datastore protected by master passphrase `oldphrase` with the new passphrase `newphrase`. Returns the updated base-64 representation of the datastore.
 
 `merge(passphrase, base64, oldphrase, force)`
 
-Merges the datastore `base64` the internal datastore protected by a master passphrase. If `oldphrase` is null or empty, `passphrase` is used to decode `base64`. If `force` is falsy, the function will fail in the event of a merge conflict. Returns the updated base64 representation of the datastore.
+Merges the datastore `base64` the internal datastore protected by a master passphrase. If `oldphrase` is null or empty, `passphrase` is used to decode `base64`. If `force` is falsy, the function will fail in the event of a merge conflict. Returns the updated base-64 representation of the datastore.
 
 ## License
 
