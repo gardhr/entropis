@@ -1,6 +1,6 @@
 {
   "name": "entropis",
-  "version": "1.4.17",
+  "version": "1.4.18",
   "description": "password manager",
   "main": "entropis.js",
   "scripts": {
