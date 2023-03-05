@@ -2,6 +2,9 @@
 
 Note: a basic web interface can be found [here](https://gardhr.github.io/entropis/) (also listed in this repo as the file "entropis.html").
 
+[![npm version](https://badge.fury.io/js/entropis.png)](https://badge.fury.io/js/entropis)
+[![NPM Downloads](https://img.shields.io/npm/dw/entropis)](https://www.npmjs.com/package/entropis)
+[![Known Vulnerabilities](https://snyk.io/test/github/gardhr/entropis/badge.svg?targetFile=package.json)](https://snyk.io/test/github/gardhr/entropis?targetFile=package.json)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/gardhr/entropis/master/LICENSE.MIT)
 
 - [Motivation](#Motivation)
