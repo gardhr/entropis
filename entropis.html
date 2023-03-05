@@ -824,7 +824,7 @@ Sanity check (trailing bits must match those of the OTP)
     <h2 align="center">Entropis Password Manager</h2>
     <br />
     <form onsubmit="refresh()" action="javascript:void(0)">
-      <table align="center" style="">
+      <table align="center" style="word-wrap: break-word">
         <tr>
           <td>
             <input
@@ -866,7 +866,6 @@ Sanity check (trailing bits must match those of the OTP)
             />
           </td>
         </tr>
-
         <tr>
           <td>
             Master Passphrase &nbsp;<input
@@ -938,7 +937,7 @@ Sanity check (trailing bits must match those of the OTP)
                 id="oldpass"
                 onfocus="this.select()"
               />
-              <!-- FIXME: Doesn't conform to HTML spec -->
+              <!-- FIXME: Doesn't conform to HTML spec <br></br> --><br></br>
               Merge with
               <textarea
                 id="merge"
