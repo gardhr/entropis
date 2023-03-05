@@ -743,7 +743,7 @@ Sanity check (trailing bits must match those of the OTP)
         var force = element("force-merge").checked;
         if (!entropis.merge(passphrase, input, oldpass, force))
           return error(
-            "Cannot merge due a merge conflict and/or incorrect set of passwords provided)"
+            "Cannot merge due to merge conflict and/or incorrect set of passwords provided)"
           );
         reset_input("oldpass");
         refresh();
