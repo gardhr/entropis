@@ -178,6 +178,7 @@ var entropis = (function () {
 */
 
   function encode(passphrase, text) {
+    if (!passphrase) return null;
     if (text == null) text = "";
     var blob = "";
     var hex = "";
@@ -357,8 +358,7 @@ Sanity check (trailing bits must match those of the OTP)
 
   function set(passphrase, domain, password) {
     var extracted = get(passphrase);
-    if (extracted == null) return null;
-    if (password === undefined) return null;
+    if (extracted == null || password === undefined) return null;
     if (password == null) delete extracted[domain];
     else extracted[domain] = password;
     return update(passphrase, extracted);
@@ -381,7 +381,7 @@ Sanity check (trailing bits must match those of the OTP)
   }
 
   function merge(passphrase, base64, oldphrase, force) {
-    if (oldphrase == null) oldphrase = passphrase;
+    if (!oldphrase) oldphrase = passphrase;
     var extracted = get(passphrase);
     var other = extract(oldphrase, base64);
     if (extracted == null || other == null) return null;
