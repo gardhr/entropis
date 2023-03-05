@@ -768,6 +768,7 @@ Sanity check (trailing bits must match those of the OTP)
       function initiate_change() {
         hide_specials();
         show_element("change-toggle");
+        element("newpass").select();
       }
 
       function change() {
