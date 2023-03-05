@@ -37,11 +37,11 @@ Generates a hexadecimal hash of any length (the default is 128 digits, or 512 bi
 
 `entropis.encode(passphrase, text)`
 
-Converts a block of text to a base-64 encoded datastore. (Note: Does NOT modify the internal state of the `entropis` object.)
+Converts a block of text to a base-64 encoded datastore with passphrase. (Note: Does NOT modify the internal state of the `entropis` object.)
 
 `entropis.decode(passphrase, base64)`
 
-Converts a base-64 encoded datastore to text. (Note: Does NOT modify the internal state of the `entropis` object.)
+Converts a base-64 encoded datastore to text with passphrase. (Note: Does NOT modify the internal state of the `entropis` object.)
 
 `entropis.set(passphrase, domain, password)`
 
@@ -57,11 +57,15 @@ Securely deletes the entry for a given domain within the internal datastore usin
 
 `entropis.clear(passphrase)`
 
-Deletes the internal datastore protected by a master passphrase. (Note: If `passphrase` is null, the internal state is unconditionally reset.)
+Deletes the internal datastore protected by a master passphrase. If passphrase is null, the internal state is unconditionally reset.
 
 `entropis.change(oldphrase, newphrase)`
 
 Re-encodes the internal datastore protected by master passphrase `oldphrase` with the new passphrase `newphrase`. Returns the updated base64 representation of the datastore.
+
+`merge(passphrase, base64, oldphrase, force)`
+
+Merges the datastore `base64` the internal datastore protected by a master passphrase. If `oldphrase` is null or empty, `passphrase` is used to decode `base64`. If `force` is falsy, the function will fail in the event of a merge conflict. Returns the updated base64 representation of the datastore.
 
 ## License
 
