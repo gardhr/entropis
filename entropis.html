@@ -604,6 +604,11 @@ Sanity check (trailing bits must match those of the OTP)
         //hide_element("specials-toggle");
       }
 
+      function lock() {
+        reset_input("passphrase");
+        refresh();
+      }
+
       function toggle() {
         var passphrase = element("passphrase");
         var newpass = element("newpass");
@@ -888,7 +893,13 @@ Sanity check (trailing bits must match those of the OTP)
             <input
               type="submit"
               value="unlock"
-              title="Unlock and load the current datastore"
+              title="Log in to the current datastore"
+            />
+            <input
+              type="submit"
+              value="lock"
+              title="Log out of the current datastore"
+              onclick="lock()"
             />
           </td>
         </tr>
