@@ -402,8 +402,7 @@ Sanity check (trailing bits must match those of the OTP)
     if (oldphrase == null) oldphrase = passphrase;
     var extracted = get(passphrase);
     var other = extract(oldphrase, base64);
-    if (extracted == null) return null;
-    if (other == null) return entropis.storage;
+    if (extracted == null || other == null) return null;
     var updated = {};
     for (domain in other) {
       if (!force && extracted.hasOwnProperty(domain)) return null;
