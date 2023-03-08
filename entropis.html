@@ -37,6 +37,210 @@
         white-space: nowrap;
       }
     </style>
+  </head>
+  <body
+    style="
+      background-color: #d9ecec;
+      color: #369;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 20px;
+      font-weight: bold;
+    "
+    onload="initialize()"
+  >
+    <div align="left">
+      <a href="https://github.com/gardhr/entropis">GitHub</a>
+    </div>
+    <h2 align="center">Entropis Password Manager</h2>
+    <div align="center">(Note: This page can be saved and used offline.)</div>
+    <br />
+    <br /><br />
+    <form onsubmit="refresh()" action="javascript:void(0)">
+      <table align="center">
+        <tr>
+          <td>
+            <input
+              type="button"
+              id="visibility"
+              value="show 👁"
+              onclick="toggle()"
+              title="Show/hide all password fields"
+            />
+            <input
+              type="button"
+              value="delete ⚠️"
+              onclick="drop()"
+              title="Delete the current datastore"
+            />
+            <input
+              type="button"
+              value="import 📋"
+              onclick="initiate_import()"
+              title="Import base64-encoded datastore"
+            />
+            <input
+              type="button"
+              value="merge 📋"
+              onclick="initiate_merge()"
+              title="Merge a base64-encoded datastore with this one"
+            />
+            <input
+              type="button"
+              value="export 📋"
+              onclick="do_export()"
+              title="Export the current datastore"
+            />
+            <input
+              type="button"
+              value="change 🔀"
+              onclick="initiate_change()"
+              title="Change password"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Master Passphrase &nbsp;<input
+              type="password"
+              id="passphrase"
+              onfocus="this.select()"
+            />
+            <input
+              type="submit"
+              value="open 🔓"
+              title="Open the current datastore"
+            />
+            <input
+              type="submit"
+              value="close 🔐"
+              title="Close the current datastore"
+              onclick="lock()"
+            />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div hidden width="100%" id="import-toggle" align="center">
+              Import
+              <textarea
+                id="import"
+                onfocus="this.value = '', this.select()"
+              ></textarea>
+              <input type="button" value="submit" onclick="do_import()" />
+              <input
+                type="button"
+                value="cancel"
+                onclick="hide_element('import-toggle')"
+              />
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div hidden width="100%" id="export-toggle" align="center">
+              Export <textarea id="export" onfocus="this.select()"></textarea>
+              <input
+                type="button"
+                value="dismiss"
+                onclick="hide_element('export-toggle')"
+              />
+            </div>
+          </td>
+        </tr>
+        <tbody hidden width="100%" id="change-toggle">
+          <tr>
+            <td>
+              New Passphrase &nbsp;<input
+                type="password"
+                id="newpass"
+                onfocus="this.select()"
+              />
+              <input type="button" value="submit" onclick="change()" />
+              <input
+                type="button"
+                value="cancel"
+                onclick="hide_element('change-toggle')"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div width="100%" id="critique-toggle">
+                <div id="critique-gauge"></div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tbody width="100%" id="merge-toggle" align="center">
+          <tr>
+            <td>
+              Old password (if applicable) &nbsp;<input
+                type="password"
+                id="oldpass"
+                onfocus="this.select()"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Merge with
+              <textarea
+                id="merge"
+                onfocus="this.value = '', this.select()"
+              ></textarea>
+              <input type="button" value="submit" onclick="do_merge()" />
+              <input
+                type="button"
+                value="cancel"
+                onclick="hide_element('merge-toggle')"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <input type="checkbox" id="force-merge" />
+              <label for="force-merge">Overwrite duplicate entries?</label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
+    <div id="specials-toggle" align="center">
+      <form onsubmit="lookup()" action="javascript:void(0)">
+        <table align="center" style="">
+          <tr>
+            <td>
+              <input type="text" id="search" onfocus="this.select()" />
+              <button title="Find a domain in the datastore">search 🔍</button>
+            </td>
+          </tr>
+        </table>
+      </form>
+      <form onsubmit="update()" action="javascript:void(0)">
+        <table align="center">
+          <tr>
+            <td>Domain</td>
+            <td>Password</td>
+          </tr>
+          <tr>
+            <td>
+              <input type="text" id="domain" onfocus="this.select()" />
+            </td>
+            <td>
+              <input type="password" id="password" onfocus="this.select()" />
+            </td>
+            <td>
+              <button title="Update domain/password pair in the datastore">
+                add/update 🔄
+              </button>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </div>
+    <p id="status" align="center" style="color: #50366d"></p>
+    <table id="listing" align="center" style=""></table>
+    <p id="errors" align="center" style="color: #d60000"></p>
     <script>
       /*
  License: MIT
@@ -851,209 +1055,5 @@ Sanity check (trailing bits must match those of the OTP)
         hide_specials();
       }
     </script>
-  </head>
-  <body
-    style="
-      background-color: #d9ecec;
-      color: #369;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 20px;
-      font-weight: bold;
-    "
-    onload="initialize()"
-  >
-    <div align="left">
-      <a href="https://github.com/gardhr/entropis">GitHub</a>
-    </div>
-    <h2 align="center">Entropis Password Manager</h2>
-    <div align="center">(Note: This page can be saved and used offline.)</div>
-    <br />
-    <br /><br />
-    <form onsubmit="refresh()" action="javascript:void(0)">
-      <table align="center">
-        <tr>
-          <td>
-            <input
-              type="button"
-              id="visibility"
-              value="show 👁"
-              onclick="toggle()"
-              title="Show/hide all password fields"
-            />
-            <input
-              type="button"
-              value="delete ⚠️"
-              onclick="drop()"
-              title="Delete the current datastore"
-            />
-            <input
-              type="button"
-              value="import 📋"
-              onclick="initiate_import()"
-              title="Import base64-encoded datastore"
-            />
-            <input
-              type="button"
-              value="merge 📋"
-              onclick="initiate_merge()"
-              title="Merge a base64-encoded datastore with this one"
-            />
-            <input
-              type="button"
-              value="export 📋"
-              onclick="do_export()"
-              title="Export the current datastore"
-            />
-            <input
-              type="button"
-              value="change 🔀"
-              onclick="initiate_change()"
-              title="Change password"
-            />
-          </td>
-        </tr>
-        <tr>
-          <td>
-            Master Passphrase &nbsp;<input
-              type="password"
-              id="passphrase"
-              onfocus="this.select()"
-            />
-            <input
-              type="submit"
-              value="open 🔓"
-              title="Open the current datastore"
-            />
-            <input
-              type="submit"
-              value="close 🔐"
-              title="Close the current datastore"
-              onclick="lock()"
-            />
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div hidden width="100%" id="import-toggle" align="center">
-              Import
-              <textarea
-                id="import"
-                onfocus="this.value = '', this.select()"
-              ></textarea>
-              <input type="button" value="submit" onclick="do_import()" />
-              <input
-                type="button"
-                value="cancel"
-                onclick="hide_element('import-toggle')"
-              />
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div hidden width="100%" id="export-toggle" align="center">
-              Export <textarea id="export" onfocus="this.select()"></textarea>
-              <input
-                type="button"
-                value="dismiss"
-                onclick="hide_element('export-toggle')"
-              />
-            </div>
-          </td>
-        </tr>
-        <tbody hidden width="100%" id="change-toggle">
-          <tr>
-            <td>
-              New Passphrase &nbsp;<input
-                type="password"
-                id="newpass"
-                onfocus="this.select()"
-              />
-              <input type="button" value="submit" onclick="change()" />
-              <input
-                type="button"
-                value="cancel"
-                onclick="hide_element('change-toggle')"
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div width="100%" id="critique-toggle">
-                <div id="critique-gauge"></div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-        <tbody width="100%" id="merge-toggle" align="center">
-          <tr>
-            <td>
-              Old password (if applicable) &nbsp;<input
-                type="password"
-                id="oldpass"
-                onfocus="this.select()"
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Merge with
-              <textarea
-                id="merge"
-                onfocus="this.value = '', this.select()"
-              ></textarea>
-              <input type="button" value="submit" onclick="do_merge()" />
-              <input
-                type="button"
-                value="cancel"
-                onclick="hide_element('merge-toggle')"
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <input type="checkbox" id="force-merge" />
-              <label for="force-merge">Overwrite duplicate entries?</label>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </form>
-    <div id="specials-toggle" align="center">
-      <form onsubmit="lookup()" action="javascript:void(0)">
-        <table align="center" style="">
-          <tr>
-            <td>
-              <input type="text" id="search" onfocus="this.select()" />
-              <button title="Find a domain in the datastore">search 🔍</button>
-            </td>
-          </tr>
-        </table>
-      </form>
-      <form onsubmit="update()" action="javascript:void(0)">
-        <table align="center">
-          <tr>
-            <td>Domain</td>
-            <td>Password</td>
-          </tr>
-          <tr>
-            <td>
-              <input type="text" id="domain" onfocus="this.select()" />
-            </td>
-            <td>
-              <input type="password" id="password" onfocus="this.select()" />
-            </td>
-            <td>
-              <button title="Update domain/password pair in the datastore">
-                add/update 🔄
-              </button>
-            </td>
-          </tr>
-        </table>
-      </form>
-    </div>
-    <p id="status" align="center" style="color: #50366d"></p>
-    <table id="listing" align="center" style=""></table>
-    <p id="errors" align="center" style="color: #d60000"></p>
   </body>
 </html>
