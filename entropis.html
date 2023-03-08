@@ -16,8 +16,8 @@
         height: 30px;
         background-color: #0bd600;
       }
-
-      .button {
+      button,
+      [type="button"] {
         background-color: #e1ecf4;
         border-radius: 10px;
         box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset;
@@ -875,7 +875,6 @@ Sanity check (trailing bits must match those of the OTP)
           <td>
             <input
               type="button"
-              class="button"
               id="visibility"
               value="show 👁"
               onclick="toggle()"
@@ -883,35 +882,30 @@ Sanity check (trailing bits must match those of the OTP)
             />
             <input
               type="button"
-              class="button"
               value="delete ⚠️"
               onclick="drop()"
               title="Delete the current datastore"
             />
             <input
               type="button"
-              class="button"
               value="import 📋"
               onclick="initiate_import()"
               title="Import base64-encoded datastore"
             />
             <input
               type="button"
-              class="button"
               value="merge 📋"
               onclick="initiate_merge()"
               title="Merge a base64-encoded datastore with this one"
             />
             <input
               type="button"
-              class="button"
               value="export 📋"
               onclick="do_export()"
               title="Export the current datastore"
             />
             <input
               type="button"
-              class="button"
               value="change 🔀"
               onclick="initiate_change()"
               title="Change password"
@@ -927,13 +921,11 @@ Sanity check (trailing bits must match those of the OTP)
             />
             <input
               type="submit"
-              class="button"
               value="open 🔓"
               title="Open the current datastore"
             />
             <input
               type="submit"
-              class="button"
               value="close 🔐"
               title="Close the current datastore"
               onclick="lock()"
@@ -948,15 +940,9 @@ Sanity check (trailing bits must match those of the OTP)
                 id="import"
                 onfocus="this.value = '', this.select()"
               ></textarea>
+              <input type="button" value="submit" onclick="do_import()" />
               <input
                 type="button"
-                class="button"
-                value="submit"
-                onclick="do_import()"
-              />
-              <input
-                type="button"
-                class="button"
                 value="cancel"
                 onclick="hide_element('import-toggle')"
               />
@@ -969,7 +955,6 @@ Sanity check (trailing bits must match those of the OTP)
               Export <textarea id="export" onfocus="this.select()"></textarea>
               <input
                 type="button"
-                class="button"
                 value="dismiss"
                 onclick="hide_element('export-toggle')"
               />
@@ -984,15 +969,9 @@ Sanity check (trailing bits must match those of the OTP)
                 id="newpass"
                 onfocus="this.select()"
               />
+              <input type="button" value="submit" onclick="change()" />
               <input
                 type="button"
-                class="button"
-                value="submit"
-                onclick="change()"
-              />
-              <input
-                type="button"
-                class="button"
                 value="cancel"
                 onclick="hide_element('change-toggle')"
               />
@@ -1023,15 +1002,9 @@ Sanity check (trailing bits must match those of the OTP)
                 id="merge"
                 onfocus="this.value = '', this.select()"
               ></textarea>
+              <input type="button" value="submit" onclick="do_merge()" />
               <input
                 type="button"
-                class="button"
-                value="submit"
-                onclick="do_merge()"
-              />
-              <input
-                type="button"
-                class="button"
                 value="cancel"
                 onclick="hide_element('merge-toggle')"
               />
@@ -1052,9 +1025,7 @@ Sanity check (trailing bits must match those of the OTP)
           <tr>
             <td>
               <input type="text" id="search" onfocus="this.select()" />
-              <button class="button" title="Find a domain in the datastore">
-                search 🔍
-              </button>
+              <button title="Find a domain in the datastore">search 🔍</button>
             </td>
           </tr>
         </table>
@@ -1073,10 +1044,7 @@ Sanity check (trailing bits must match those of the OTP)
               <input type="password" id="password" onfocus="this.select()" />
             </td>
             <td>
-              <button
-                class="button"
-                title="Update domain/password pair in the datastore"
-              >
+              <button title="Update domain/password pair in the datastore">
                 add/update 🔄
               </button>
             </td>
