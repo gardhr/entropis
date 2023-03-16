@@ -5,7 +5,7 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/gardhr/entropis/badge.svg?targetFile=package.json)](https://snyk.io/test/github/gardhr/entropis?targetFile=package.json)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/gardhr/entropis/master/LICENSE.MIT)
 
-Note: a basic web interface can be found [here](https://gardhr.github.io/entropis/) (also listed in this repo as "entropis.html").
+Note: a basic web interface can be found [here](https://gardhr.github.io/entropis/) (also listed in this repo under "[entropis.html](https://raw.githubusercontent.com/gardhr/entropis/main/entropis.html)").
 
 - [Motivation](#Motivation)
 - [Status](#Status)
@@ -43,9 +43,9 @@ Converts a block of text to a base-64 encoded datastore with passphrase. (Note: 
 
 Converts a base-64 encoded datastore to text with passphrase. (Note: Does NOT modify the internal state of the `entropis` object.)
 
-`entropis.set(passphrase, domain, password)`
+`entropis.set(passphrase, domain, password, user)`
 
-Securely stores the password for a given domain within the internal datastore using a master passphrase. Returns the updated base-64 representation of the datastore.
+Securely stores the password and username for a given domain within the internal datastore using a master passphrase. Returns the updated base-64 representation of the datastore.
 
 `entropis.get(passphrase, domain)`
 
