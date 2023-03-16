@@ -16,6 +16,9 @@
         height: 30px;
         background-color: #0bd600;
       }
+      input,
+      textarea,
+      radio,
       button,
       [type="button"] {
         background-color: #e1ecf4;
@@ -40,8 +43,12 @@
         background-color: #d9ecec;
         color: #369;
         font-family: Arial, Helvetica, sans-serif;
-        font-size: 20px;
+        font-size: 14pt;
         font-weight: bold;
+      }
+      #also {
+        font-size: 6pt;
+        font-weight: lighter;
       }
     </style>
   </head>
@@ -49,7 +56,10 @@
     <div align="left">
       <a href="https://github.com/gardhr/entropis">GitHub</a>
     </div>
-    <div align="center">(Note: This page can be saved and used offline.)</div>
+    <br />
+    <div align="center" id="also">
+      (Note: This page can be saved and used offline.)
+    </div>
     <br />
     <form onsubmit="refresh()" action="javascript:void(0)">
       <table align="center">
@@ -216,11 +226,15 @@
         <table align="center">
           <tr>
             <td>Domain</td>
+            <td>Username</td>
             <td>Password</td>
           </tr>
           <tr>
             <td>
               <input type="text" id="domain" onfocus="this.select()" />
+            </td>
+            <td>
+              <input type="text" id="user" onfocus="this.select()" />
             </td>
             <td>
               <input type="password" id="password" onfocus="this.select()" />
@@ -609,12 +623,12 @@ Sanity check (trailing bits must match those of the OTP)
           ));
         }
 
-        function set(passphrase, domain, password) {
+        function set(passphrase, domain, password, user) {
           domain = domain.trim().toLowerCase();
           var extracted = get(passphrase);
           if (extracted == null || password === undefined) return null;
           if (password == null) delete extracted[domain];
-          else extracted[domain] = password;
+          else extracted[domain] = { password, user };
           return update(passphrase, extracted);
         }
 
@@ -714,12 +728,13 @@ Sanity check (trailing bits must match those of the OTP)
         show_element(that, false);
       }
 
-      function rebuild(passwords) {
+      function rebuild(database) {
         status(null);
         reset_html("errors");
         reset_html("listing");
         reset_input("search");
         reset_input("domain");
+        reset_input("user");
         reset_input("password");
         try {
           localStorage.setItem("entropis", entropis.storage);
@@ -727,23 +742,24 @@ Sanity check (trailing bits must match those of the OTP)
           return error("Browser local storage is full and/or unavailable");
         }
         var listing = element("listing");
-        if (passwords == null) {
+        if (database == null) {
           var passphrase = value("passphrase");
           if (passphrase === "") {
             if (entropis.storage == null)
               return status("Please set your new master passphrase");
             return status("Please enter your master passphrase");
           }
-          passwords = entropis.get(passphrase);
-          if (passwords == null) return error("Incorrect master password");
+          database = entropis.get(passphrase);
+          if (database == null) return error("Incorrect master password");
         }
-        if (Object.keys(passwords).length == 0)
+        if (Object.keys(database).length == 0)
           return status("Password list is empty");
-        for (var domain in passwords) {
+        for (var domain in database) {
           var row = create("tr");
           listing.appendChild(row);
           var td1 = create("td");
           row.appendChild(td1);
+
           var bcd = create("button");
           bcd.setAttribute("class", "button");
           bcd.innerText = "📋";
@@ -756,6 +772,7 @@ Sanity check (trailing bits must match those of the OTP)
             })
           );
           td1.appendChild(bcd);
+
           var inp1 = create("input");
           var color = "#D3D3D3";
           inp1.readOnly = true;
@@ -766,13 +783,44 @@ Sanity check (trailing bits must match those of the OTP)
             reset_input("domain", that.value);
           });
           td1.appendChild(inp1);
+
+          var info = database[domain];
+          var user = info.user || "";
+          // Note: Ensure internal format is backward compatible
+          var password = info.password || info;
+
           var td2 = create("td");
           row.appendChild(td2);
           var bcp = create("button");
           bcp.setAttribute("class", "button");
           bcp.innerText = "📋";
+          bcp.title = "Copy username to clipboard";
+          bcp.addEventListener(
+            "click",
+            curry(user, (user) => {
+              copy(user);
+              reset_input("user", user);
+            })
+          );
+          td2.appendChild(bcp);
+
+          var inp2 = create("input");
+          inp2.type = "text";
+          inp2.readOnly = true;
+          inp2.value = user;
+          inp2.style.backgroundColor = color;
+          inp2.onfocus = curry(inp2, (that) => {
+            that.select();
+            reset_input("user", that.value);
+          });
+          td2.appendChild(inp2);
+
+          var td3 = create("td");
+          row.appendChild(td3);
+          var bcp = create("button");
+          bcp.setAttribute("class", "button");
+          bcp.innerText = "📋";
           bcp.title = "Copy password to clipboard";
-          var password = passwords[domain];
           bcp.addEventListener(
             "click",
             curry(password, (password) => {
@@ -780,23 +828,27 @@ Sanity check (trailing bits must match those of the OTP)
               reset_input("password", password);
             })
           );
-          td2.appendChild(bcp);
-          var inp2 = create("input");
-          if (visible) inp2.type = "text";
-          else inp2.type = "password";
-          inp2.readOnly = true;
-          inp2.value = password;
-          inp2.style.backgroundColor = color;
-          inp2.onfocus = curry(inp2, (that) => {
+          td3.appendChild(bcp);
+
+          var inp3 = create("input");
+          if (visible) inp3.type = "text";
+          else inp3.type = "password";
+          inp3.readOnly = true;
+          inp3.value = password;
+          inp3.style.backgroundColor = color;
+          inp3.onfocus = curry(inp3, (that) => {
             that.select();
             reset_input("password", that.value);
           });
-          td2.appendChild(inp2);
-          var b1 = create("button");
-          b1.innerText = "delete 🚫";
-          b1.setAttribute("class", "button");
-          b1.title = "Delete this entry from the datastore";
-          b1.addEventListener(
+          td3.appendChild(inp3);
+
+          var td4 = create("td");
+          row.appendChild(td4);
+          var rem = create("button");
+          rem.innerText = "delete 🚫";
+          rem.setAttribute("class", "button");
+          rem.title = "Delete this entry from the datastore";
+          rem.addEventListener(
             "click",
             curry(domain, (domain) => {
               if (
@@ -810,7 +862,7 @@ Sanity check (trailing bits must match those of the OTP)
               remove(domain);
             })
           );
-          td2.appendChild(b1);
+          td4.appendChild(rem);
         }
         show_element("specials-toggle");
       }
@@ -823,9 +875,9 @@ Sanity check (trailing bits must match those of the OTP)
         hide_element("critique-toggle");
       }
 
-      function refresh(passwords) {
+      function refresh(database) {
         hide_utils();
-        return rebuild(passwords);
+        return rebuild(database);
       }
 
       function hide_specials() {
@@ -864,8 +916,8 @@ Sanity check (trailing bits must match those of the OTP)
 
       function update() {
         var passphrase = value("passphrase");
-        var passwords = entropis.get(passphrase);
-        if (passwords == null)
+        var database = entropis.get(passphrase);
+        if (database == null)
           return error("Cannot update (incorrect master password)");
         var domain = value("domain").trim().toLowerCase();
         if (domain === "") return error("Domain cannot be empty");
@@ -883,9 +935,10 @@ Sanity check (trailing bits must match those of the OTP)
         if (password === "") {
           if (!confirm("Warning: password is empty.")) return;
         }
-        entropis.set(passphrase, domain, password);
-        passwords[domain] = password;
-        refresh(passwords);
+        var user = value("user");
+        entropis.set(passphrase, domain, password, user);
+        database[domain] = { password, user };
+        refresh(database);
       }
 
       function remove(domain) {
@@ -902,13 +955,13 @@ Sanity check (trailing bits must match those of the OTP)
       }
 
       function lookup() {
-        var passwords = entropis.get(value("passphrase"));
-        if (passwords == null)
+        var database = entropis.get(value("passphrase"));
+        if (database == null)
           return error("Cannot search (incorrect master password)");
         var pattern = value("search").trim().toLowerCase();
         var found = {};
-        for (var domain in passwords) {
-          if (domain.indexOf(pattern) != -1) found[domain] = passwords[domain];
+        for (var domain in database) {
+          if (domain.indexOf(pattern) != -1) found[domain] = database[domain];
         }
         refresh(found);
         var count = Object.keys(found).length;
@@ -978,7 +1031,7 @@ Sanity check (trailing bits must match those of the OTP)
         var force = element("force-merge").checked;
         if (!entropis.merge(passphrase, input, oldpass, force))
           return error(
-            "Cannot merge due to merge conflict and/or incorrect set of passwords provided)"
+            "Cannot merge due to merge conflict and/or incorrect set of database provided)"
           );
         reset_input("oldpass");
         refresh();

@@ -356,12 +356,12 @@ Sanity check (trailing bits must match those of the OTP)
     return (entropis.storage = encode(passphrase, JSON.stringify(extracted)));
   }
 
-  function set(passphrase, domain, password) {
+  function set(passphrase, domain, password, user) {
     domain = domain.trim().toLowerCase();
     var extracted = get(passphrase);
     if (extracted == null || password === undefined) return null;
     if (password == null) delete extracted[domain];
-    else extracted[domain] = password;
+    else extracted[domain] = { password, user };
     return update(passphrase, extracted);
   }
 
