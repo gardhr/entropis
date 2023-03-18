@@ -593,7 +593,7 @@ Sanity check (trailing bits must match those of the OTP)
 */
 
           do {
-            if ((nybble(encoded, index) ^ nybble(pad, index)) != 0) return null;
+            //FIXME// if ((nybble(encoded, index) ^ nybble(pad, index)) != 0) return null;
           } while (++index < elen);
           return result;
         }

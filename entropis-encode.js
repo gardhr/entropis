@@ -12,5 +12,7 @@ if (argc > 3) output = argv[3];
 const { fileExists, readFileText, writeFileText } = require("./common");
 if (fileExists(input)) input = readFileText(input);
 let result = entropis.encode(pass, input);
+log(result);
+log(entropis.decode(pass, result));
 if (output == null) log(result);
 else writeFileText(output, result);
