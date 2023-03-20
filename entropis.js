@@ -65,15 +65,9 @@ var entropis = (function () {
 
   function asHex(data) {
     var result = "";
-    let encoded = encodeURIComponent(data);
-    for (let index = 0; index < encoded.length; ++index) {
-      let code = undefined;
-      let ch = encoded[index];
-      if (ch == "%") {
-        code = Number("0x" + encoded[index + 1] + encoded[index + 2]);
-        index += 2;
-      } else code = char(ch);
-      result += byteToHex[code];
+    for (index = 0; index < data.length; index++) {
+      var hex = data.charCodeAt(index).toString(16);
+      result += ("000" + hex).slice(-4);
     }
     return result;
   }
@@ -136,7 +130,7 @@ var entropis = (function () {
     var value = BigInt("0x" + merged);
 
     /*
-  Build the result
+ Build the result
 */
     var result = "";
 
@@ -153,7 +147,7 @@ var entropis = (function () {
       buffer += value.toString(16);
 
       /*
-  Sponge construction; extract hash from our buffer
+ Sponge construction; extract hash from our buffer
 */
       var next = 0;
       var eod = buffer.length - 2;
@@ -185,7 +179,7 @@ var entropis = (function () {
     var buffer = "";
 
     /*
-  Generate a 512-bit hash seed from the passphrase and a pseudorandom `salt` (This hash is "public" and will be needed to decode the result)
+ Generate a 512-bit hash seed from the passphrase and a pseudorandom `salt` (This hash is "public" and will be needed to decode the result)
 */
 
     for (var i = 0; i < 16; ++i)
@@ -196,14 +190,16 @@ var entropis = (function () {
     /*
  Embed the length of the input text in hexadecimal
 */
-    var size = text.length;
+    var enc = asHex(text);
+
+    var size = enc.length;
     var shex = toHex(size);
     blob += byteToHex[shex.length][1];
     blob += shex;
-    blob += asHex(text);
+    blob += enc;
 
     /*
-Generate a one-time-pad (OTP) using our "public" seed
+ Generate a one-time-pad (OTP) using our "public" seed
 */
 
     var needed = blob.length;
@@ -216,7 +212,7 @@ Generate a one-time-pad (OTP) using our "public" seed
     }
 
     /*
-Encode the text
+ Encode the text
 */
 
     var next;
@@ -228,14 +224,14 @@ Encode the text
     }
 
     /*
-Append remaining padding to encoded data
+ Append remaining padding to encoded data
 */
 
     var limit = pad.length - Math.floor((128 + pad.length) % 6);
     while (next < limit) hex += pad.charAt(next++);
 
     /*
-Convert the result from hexadecimal to base-64
+ Convert the result from hexadecimal to base-64
 */
 
     var length = hex.length;
@@ -262,17 +258,13 @@ Convert the result from hexadecimal to base-64
 
   function decode(passphrase, base64) {
     /*
-Convert the base-64 encoded data to hexadecimal
+ Convert the base-64 encoded data to hexadecimal
 */
 
     base64 = base64.trim();
     var result = "";
     var temp = "";
-    for (
-      var length = base64.length, index = length - 1;
-      index > 0;
-      index -= 4
-    ) {
+    for (var index = base64.length - 1; index >= 0; index -= 4) {
       var value = 0;
       for (var offset = 0; offset < 4; ++offset) {
         var seek = index - offset;
@@ -286,12 +278,12 @@ Convert the base-64 encoded data to hexadecimal
       }
     }
     var hex = "";
-    for (var length = temp.length, index = length - 1; index > 0; index--) {
+    for (var index = temp.length - 1; index >= 0; index--) {
       hex += temp[index];
     }
 
     /*
-Extract our "public" seed header and reconstruct the original OTP
+ Extract our "public" seed header and reconstruct the original OTP
 */
 
     var seed = hex.substr(0, 128);
@@ -299,13 +291,13 @@ Extract our "public" seed header and reconstruct the original OTP
     var elen = encoded.length;
     var pad = "";
     var current = passphrase;
-    while (pad.length < elen) {
+    while (pad.length <= elen) {
       current = hash(current, seed, -1);
       pad += current;
     }
 
     /*
-Extract embedded text length info
+ Extract embedded text length info
 */
 
     var slen = 0;
@@ -316,23 +308,33 @@ Extract embedded text length info
     }
 
     /*
-Decode text
+ Decode hex
 */
 
-    for (var count = 0; count < slen; ++count, index += 2) {
+    var dec = "";
+
+    for (var count = 0; count < slen; count += 2, index += 2) {
       var xored = (nybble(encoded, index) ^ nybble(pad, index)) << 4;
       xored |= nybble(encoded, index + 1) ^ nybble(pad, index + 1);
-      if (xored == 0) return null;
-      result += String.fromCodePoint(xored);
+      dec += byteToHex[xored];
     }
 
     /*
-Sanity check (trailing bits must match those of the OTP)
+ Extract text
+*/
+
+    var tmp = dec.match(/.{1,4}/g);
+    for (var tdx = 0; tdx < tmp.length; tdx++)
+      result += String.fromCharCode(parseInt(tmp[tdx], 16));
+
+    /*
+ Sanity check (trailing bits must match those of the OTP)
 */
 
     do {
-      //FIXME// if ((nybble(encoded, index) ^ nybble(pad, index)) != 0) return null;
+      if ((nybble(encoded, index) ^ nybble(pad, index)) != 0) return null;
     } while (++index < elen);
+
     return result;
   }
 
