@@ -5,7 +5,7 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/gardhr/entropis/badge.svg?targetFile=package.json)](https://snyk.io/test/github/gardhr/entropis?targetFile=package.json)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/gardhr/entropis/master/LICENSE.MIT)
 
-Note: a basic web interface can be found [here](https://gardhr.github.io/entropis/) (also listed in this repo under "[entropis.html](https://raw.githubusercontent.com/gardhr/entropis/main/entropis.html)").
+The web interface can be found [here](https://gardhr.github.io/entropis/) (also listed in this repo under "[entropis.html](https://raw.githubusercontent.com/gardhr/entropis/main/entropis.html)").
 
 - [Motivation](#Motivation)
 - [Status](#Status)
@@ -15,13 +15,7 @@ Note: a basic web interface can be found [here](https://gardhr.github.io/entropi
 
 ## Motivation
 
-Reliable password storage has become a problematic issue in recent years. Password managers have proven to be as prone as ever to security vulnerabilities, while at the same time only growing in complexity day by day. The goal of this project is to remedy that very situation: to develop an open-source password manager based a few simple yet powerful building blocks and implemented in a variety of programming languages. Entropis combines finite-field mappings with a sponge construction to generate a secure hash from a passphrase and salt. It also provides an interface to encode and decode data as a base-64 string.
-
-## Status
-
-**_WARNING_**
-
-This project is currently in the "experimental" or "beta" stage. The validity of the algorithm has yet to be verified (the code is however fairly well documented and relatively easy to follow). Use at your own risk!
+Reliable password storage has become a problematic issue in recent years. Password managers have proven to be as prone as ever to security vulnerabilities, while at the same time only growing in complexity day by day. The goal of this project is to remedy that very situation: to develop an open-source password manager based a few simple yet powerful building blocks and implemented in a variety of programming languages. Entropis combines finite-field mappings with a sponge construction to generate a secure hash from a passphrase and salt. It also provides an interface to encode and decode data as a base-64 string. Finally, a simple "offline" web interface is provided to actually manage passwords.
 
 ## Algorithm
 
